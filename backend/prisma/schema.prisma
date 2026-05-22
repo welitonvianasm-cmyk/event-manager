@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  events           Event[]
+  templates        EventTemplate[]
+  catalogSuppliers CatalogSupplier[]
+  catalogMaterials CatalogMaterial[]
+}
+
+model CatalogSupplier {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  name        String
+  category    String   @default("OUTRO")
+  phone       String?
+  email       String?
+  contactName String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  materials      CatalogMaterial[]
+  eventSuppliers EventSupplier[]
+}
+
+model CatalogMaterial {
+  id                  String           @id @default(cuid())
+  userId              String
+  user                User             @relation(fields: [userId], references: [id])
+  name                String
+  category            String           @default("OUTRO")
+  preferredSupplierId String?
+  preferredSupplier   CatalogSupplier? @relation(fields: [preferredSupplierId], references: [id])
+  defaultUnitPrice    Float?
+  notes               String?
+  createdAt           DateTime         @default(now())
+
+  eventSuppliers EventSupplier[]
+}
+
+model Event {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  name         String
+  eventType    String   @default("PRESENCIAL")
+  totalDays    Int      @default(1)
+  startDate    DateTime
+  endDate      DateTime
+  location     String?
+  onlineUrl    String?
+  participants Int?
+  status       String   @default("RASCUNHO")
+  templateId   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  checklistSections ChecklistSection[]
+  eventSuppliers    EventSupplier[]
+  scriptDays        ScriptDay[]
+  communications    CommunicationTemplate[]
+  people            EventPerson[]
+}
+
+// ─── Pessoas / Equipe do evento ───────────────────────────────────────────────
+
+model EventPerson {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name      String
+  email     String?
+  phone     String?
+  role      String?
+  createdAt DateTime @default(now())
+
+  checklistItems ChecklistItem[]
+  supplierItems  EventSupplier[]
+}
+
+// ─── Checklist ────────────────────────────────────────────────────────────────
+
+model ChecklistSection {
+  id      String          @id @default(cuid())
+  eventId String
+  event   Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name    String
+  order   Int
+  items   ChecklistItem[]
+}
+
+model ChecklistItem {
+  id          String       @id @default(cuid())
+  sectionId   String
+  section     ChecklistSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  notes       String?
+  status      String       @default("PENDENTE")
+  dueDate     DateTime?
+  personId    String?
+  person      EventPerson? @relation(fields: [personId], references: [id], onDelete: SetNull)
+  assignee    String?
+  order       Int
+}
+
+// ─── Suppliers per event ──────────────────────────────────────────────────────
+
+model EventSupplier {
+  id                  String           @id @default(cuid())
+  eventId             String
+  event               Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  catalogMaterialId   String?
+  catalogMaterial     CatalogMaterial? @relation(fields: [catalogMaterialId], references: [id])
+  catalogSupplierId   String?
+  catalogSupplier     CatalogSupplier? @relation(fields: [catalogSupplierId], references: [id])
+  category            String           @default("OUTRO")
+  description         String
+  status              String           @default("PENDENTE")
+  paymentStatus       String           @default("PENDENTE")
+  paymentDueDate      DateTime?
+  paymentType         String?
+  responsiblePersonId String?
+  responsiblePerson   EventPerson?     @relation(fields: [responsiblePersonId], references: [id], onDelete: SetNull)
+  responsible         String?
+  supplierName        String?
+  supplierPhone       String?
+  supplierContact     String?
+  quantity            Float?
+  unitPrice           Float?
+  notes               String?
+  createdAt           DateTime         @default(now())
+
+  installments        SupplierInstallment[]
+}
+
+model SupplierInstallment {
+  id         String        @id @default(cuid())
+  supplierId String
+  supplier   EventSupplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  number     Int
+  dueDate    DateTime
+  value      Float
+  paid       Boolean       @default(false)
+}
+
+// ─── Script (Minuto a Minuto) ─────────────────────────────────────────────────
+
+model ScriptDay {
+  id        String       @id @default(cuid())
+  eventId   String
+  event     Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  dayNumber Int
+  label     String?
+  items     ScriptItem[]
+
+  @@unique([eventId, dayNumber])
+}
+
+model ScriptItem {
+  id          String    @id @default(cuid())
+  scriptDayId String
+  scriptDay   ScriptDay @relation(fields: [scriptDayId], references: [id], onDelete: Cascade)
+  order       Int
+  startTime   String
+  endTime     String
+  title       String
+  responsible String?
+  type        String    @default("OUTRO")
+  notes       String?
+}
+
+// ─── Templates ────────────────────────────────────────────────────────────────
+
+model EventTemplate {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  eventType String   @default("PRESENCIAL")
+  totalDays Int      @default(1)
+  createdAt DateTime @default(now())
+
+  sections   TemplateSection[]
+  scriptDays TemplateScriptDay[]
+}
+
+model TemplateSection {
+  id         String         @id @default(cuid())
+  templateId String
+  template   EventTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  name       String
+  order      Int
+  items      TemplateItem[]
+}
+
+model TemplateItem {
+  id          String          @id @default(cuid())
+  sectionId   String
+  section     TemplateSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  order       Int
+}
+
+model TemplateScriptDay {
+  id         String               @id @default(cuid())
+  templateId String
+  template   EventTemplate        @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  dayNumber  Int
+  label      String?
+  items      TemplateScriptItem[]
+}
+
+model TemplateScriptItem {
+  id          String            @id @default(cuid())
+  scriptDayId String
+  scriptDay   TemplateScriptDay @relation(fields: [scriptDayId], references: [id], onDelete: Cascade)
+  order       Int
+  startTime   String
+  endTime     String
+  title       String
+  responsible String?
+  type        String            @default("OUTRO")
+  notes       String?
+}
+
+// Communications module — schema ready, UI pending
+model CommunicationTemplate {
+  id          String    @id @default(cuid())
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  channel     String    @default("WHATSAPP")
+  triggerType String    @default("MANUAL")
+  triggerDays Int?
+  title       String
+  body        String
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+}
