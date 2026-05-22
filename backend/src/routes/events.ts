@@ -2,8 +2,7 @@ import { Router, Response } from 'express'
 import { z } from 'zod'
 import prisma from '../lib/prisma'
 import { requireAuth, AuthRequest } from '../middleware/auth'
-import { getChecklistSections, defaultScriptPresencial, defaultScriptOnline } from '../../prisma/seed'
-import { EventType } from '@prisma/client'
+import { getChecklistSections, defaultScriptPresencial, defaultScriptOnline, EventTypeStr } from '../lib/event-data'
 
 const router = Router()
 router.use(requireAuth)
@@ -97,7 +96,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     }
   } else {
     // Generate checklist from event type + totalDays
-    const sections = getChecklistSections(eventType as EventType, totalDays)
+    const sections = getChecklistSections(eventType as EventTypeStr, totalDays)
     for (const [si, sec] of sections.entries()) {
       const section = await prisma.checklistSection.create({
         data: { eventId: event.id, name: sec.name, order: si },
