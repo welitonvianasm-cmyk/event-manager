@@ -13,9 +13,13 @@ import calendarRoutes from './routes/calendar'
 
 const app = express()
 const PORT = process.env.PORT ?? 3001
-const CORS_ORIGIN = (process.env.CORS_ORIGIN ?? 'http://localhost:5173').split(',')
 
-app.use(cors({ origin: CORS_ORIGIN, credentials: true }))
+app.use(cors({
+  origin: (origin, callback) => callback(null, true),
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}))
 app.use(express.json())
 
 app.use('/auth', authRoutes)
