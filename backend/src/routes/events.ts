@@ -17,6 +17,7 @@ const eventSchema = z.object({
   onlineUrl: z.string().optional(),
   participants: z.number().int().optional(),
   templateId: z.string().optional(),
+  status: z.enum(['RASCUNHO', 'EM_ANDAMENTO', 'CONCLUIDO']).optional(),
 })
 
 router.get('/', async (req: AuthRequest, res: Response) => {
