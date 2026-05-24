@@ -39,6 +39,7 @@ export default function AdminPage() {
   const remove = useMutation({
     mutationFn: (id: string) => api.delete(`/admin/users/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }),
+    onError: (err: any) => alert(err?.response?.data?.error ?? 'Erro ao excluir usuário'),
   })
 
   async function impersonate(targetUser: any) {

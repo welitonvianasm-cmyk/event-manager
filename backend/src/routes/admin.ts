@@ -44,7 +44,21 @@ router.delete('/users/:id', async (req: AuthRequest, res: Response) => {
   const user = await prisma.user.findUnique({ where: { id: req.params.id } })
   if (!user) { res.status(404).json({ error: 'Usuário não encontrado' }); return }
   if (user.role === 'MASTER') { res.status(400).json({ error: 'Não é possível excluir o master' }); return }
-  await prisma.user.delete({ where: { id: req.params.id } })
+
+  await prisma.$transaction(async (tx) => {
+    // Null out catalog references in any event supplier before deleting catalog items
+    const supplierIds = (await tx.catalogSupplier.findMany({ where: { userId: req.params.id }, select: { id: true } })).map(s => s.id)
+    const materialIds = (await tx.catalogMaterial.findMany({ where: { userId: req.params.id }, select: { id: true } })).map(m => m.id)
+    if (supplierIds.length) await tx.eventSupplier.updateMany({ where: { catalogSupplierId: { in: supplierIds } }, data: { catalogSupplierId: null } })
+    if (materialIds.length) await tx.eventSupplier.updateMany({ where: { catalogMaterialId: { in: materialIds } }, data: { catalogMaterialId: null } })
+    await tx.catalogMaterial.deleteMany({ where: { userId: req.params.id } })
+    await tx.catalogSupplier.deleteMany({ where: { userId: req.params.id } })
+    // Events and templates cascade to their children automatically
+    await tx.event.deleteMany({ where: { userId: req.params.id } })
+    await tx.eventTemplate.deleteMany({ where: { userId: req.params.id } })
+    await tx.user.delete({ where: { id: req.params.id } })
+  })
+
   res.status(204).send()
 })
 
