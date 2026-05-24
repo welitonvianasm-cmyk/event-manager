@@ -15,14 +15,14 @@ export default function CatalogPage() {
   const { data: suppliers } = useQuery<any[]>({ queryKey: ['catalog-suppliers'], queryFn: () => api.get('/catalog/suppliers').then(r => r.data) })
   const { data: materials } = useQuery<any[]>({ queryKey: ['catalog-materials'], queryFn: () => api.get('/catalog/materials').then(r => r.data) })
 
-  const [supForm, setSupForm] = useState({ name: '', category: 'MATERIAL_EVENTO', phone: '', email: '', contactName: '', notes: '' })
+  const [supForm, setSupForm] = useState({ name: '', category: 'MATERIAL_EVENTO', phone: '', email: '', contactName: '', address: '', notes: '' })
   const [matForm, setMatForm] = useState({ name: '', category: 'MATERIAL_EVENTO', preferredSupplierId: '', defaultUnitPrice: '', notes: '' })
   const [showSupForm, setShowSupForm] = useState(false)
   const [showMatForm, setShowMatForm] = useState(false)
 
   const addSupplier = useMutation({
     mutationFn: (data: object) => api.post('/catalog/suppliers', data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['catalog-suppliers'] }); setShowSupForm(false); setSupForm({ name: '', category: 'MATERIAL_EVENTO', phone: '', email: '', contactName: '', notes: '' }) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['catalog-suppliers'] }); setShowSupForm(false); setSupForm({ name: '', category: 'MATERIAL_EVENTO', phone: '', email: '', contactName: '', address: '', notes: '' }) },
   })
   const deleteSupplier = useMutation({
     mutationFn: (id: string) => api.delete(`/catalog/suppliers/${id}`),
@@ -84,6 +84,10 @@ export default function CatalogPage() {
               </div>
               <div><label className="block text-xs font-medium text-gray-600 mb-1">E-mail</label>
                 <input type="email" value={supForm.email} onChange={e => setSupForm(f => ({ ...f, email: e.target.value }))}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" /></div>
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Endereço</label>
+                <input value={supForm.address} onChange={e => setSupForm(f => ({ ...f, address: e.target.value }))}
+                  placeholder="Rua, número, bairro, cidade"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" /></div>
               <div><label className="block text-xs font-medium text-gray-600 mb-1">Observações</label>
                 <textarea value={supForm.notes} onChange={e => setSupForm(f => ({ ...f, notes: e.target.value }))} rows={2}
@@ -147,6 +151,7 @@ export default function CatalogPage() {
                   <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{catLabel[s.category]}</span>
                 </div>
                 <p className="text-xs text-gray-400 mt-0.5">{[s.phone, s.contactName, s.email].filter(Boolean).join(' · ')}</p>
+                {s.address && <p className="text-xs text-gray-400 mt-0.5">📍 {s.address}</p>}
               </div>
               <button onClick={() => { if (confirm('Excluir?')) deleteSupplier.mutate(s.id) }} className="text-xs text-red-400 hover:text-red-600">✕ Excluir</button>
             </div>

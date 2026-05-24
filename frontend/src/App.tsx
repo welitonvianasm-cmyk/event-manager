@@ -10,11 +10,20 @@ import SuppliersPage from './pages/SuppliersPage'
 import ScriptPage from './pages/ScriptPage'
 import CatalogPage from './pages/CatalogPage'
 import TemplatesPage from './pages/TemplatesPage'
+import AdminPage from './pages/AdminPage'
+import GuestListPage from './pages/GuestListPage'
 import Layout from './components/Layout'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
   return user ? <>{children}</> : <Navigate to="/login" replace />
+}
+
+function MasterRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/login" replace />
+  if (user.role !== 'MASTER') return <Navigate to="/" replace />
+  return <>{children}</>
 }
 
 export default function App() {
@@ -29,8 +38,10 @@ export default function App() {
         <Route path="events/:id/checklist" element={<ChecklistPage />} />
         <Route path="events/:id/suppliers" element={<SuppliersPage />} />
         <Route path="events/:id/script" element={<ScriptPage />} />
+        <Route path="events/:id/guests" element={<GuestListPage />} />
         <Route path="catalog" element={<CatalogPage />} />
         <Route path="templates" element={<TemplatesPage />} />
+        <Route path="admin" element={<MasterRoute><AdminPage /></MasterRoute>} />
       </Route>
     </Routes>
   )

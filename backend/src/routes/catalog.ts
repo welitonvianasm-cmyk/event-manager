@@ -14,6 +14,7 @@ const supplierSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email().optional(),
   contactName: z.string().optional(),
+  address: z.string().optional(),
   notes: z.string().optional(),
 })
 
@@ -27,9 +28,8 @@ const materialSchema = z.object({
 
 // ─── Catalog Suppliers ────────────────────────────────────────────────────────
 
-router.get('/suppliers', async (req: AuthRequest, res: Response) => {
+router.get('/suppliers', async (_req: AuthRequest, res: Response) => {
   const suppliers = await prisma.catalogSupplier.findMany({
-    where: { userId: req.userId! },
     orderBy: { name: 'asc' },
   })
   res.json(suppliers)
@@ -43,8 +43,11 @@ router.post('/suppliers', async (req: AuthRequest, res: Response) => {
 })
 
 router.put('/suppliers/:id', async (req: AuthRequest, res: Response) => {
-  const exists = await prisma.catalogSupplier.findFirst({ where: { id: req.params.id, userId: req.userId! } })
+  const exists = await prisma.catalogSupplier.findFirst({ where: { id: req.params.id } })
   if (!exists) { res.status(404).json({ error: 'Fornecedor não encontrado' }); return }
+  if (exists.userId !== req.userId! && req.userRole !== 'MASTER') {
+    res.status(403).json({ error: 'Sem permissão para editar este fornecedor' }); return
+  }
   const parsed = supplierSchema.partial().safeParse(req.body)
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
   const updated = await prisma.catalogSupplier.update({ where: { id: req.params.id }, data: parsed.data })
@@ -52,17 +55,19 @@ router.put('/suppliers/:id', async (req: AuthRequest, res: Response) => {
 })
 
 router.delete('/suppliers/:id', async (req: AuthRequest, res: Response) => {
-  const exists = await prisma.catalogSupplier.findFirst({ where: { id: req.params.id, userId: req.userId! } })
+  const exists = await prisma.catalogSupplier.findFirst({ where: { id: req.params.id } })
   if (!exists) { res.status(404).json({ error: 'Fornecedor não encontrado' }); return }
+  if (exists.userId !== req.userId! && req.userRole !== 'MASTER') {
+    res.status(403).json({ error: 'Sem permissão para excluir este fornecedor' }); return
+  }
   await prisma.catalogSupplier.delete({ where: { id: req.params.id } })
   res.status(204).send()
 })
 
 // ─── Catalog Materials ────────────────────────────────────────────────────────
 
-router.get('/materials', async (req: AuthRequest, res: Response) => {
+router.get('/materials', async (_req: AuthRequest, res: Response) => {
   const materials = await prisma.catalogMaterial.findMany({
-    where: { userId: req.userId! },
     include: { preferredSupplier: true },
     orderBy: { name: 'asc' },
   })
@@ -77,8 +82,11 @@ router.post('/materials', async (req: AuthRequest, res: Response) => {
 })
 
 router.put('/materials/:id', async (req: AuthRequest, res: Response) => {
-  const exists = await prisma.catalogMaterial.findFirst({ where: { id: req.params.id, userId: req.userId! } })
+  const exists = await prisma.catalogMaterial.findFirst({ where: { id: req.params.id } })
   if (!exists) { res.status(404).json({ error: 'Material não encontrado' }); return }
+  if (exists.userId !== req.userId! && req.userRole !== 'MASTER') {
+    res.status(403).json({ error: 'Sem permissão para editar este material' }); return
+  }
   const parsed = materialSchema.partial().safeParse(req.body)
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
   const updated = await prisma.catalogMaterial.update({ where: { id: req.params.id }, data: parsed.data })
@@ -86,8 +94,11 @@ router.put('/materials/:id', async (req: AuthRequest, res: Response) => {
 })
 
 router.delete('/materials/:id', async (req: AuthRequest, res: Response) => {
-  const exists = await prisma.catalogMaterial.findFirst({ where: { id: req.params.id, userId: req.userId! } })
+  const exists = await prisma.catalogMaterial.findFirst({ where: { id: req.params.id } })
   if (!exists) { res.status(404).json({ error: 'Material não encontrado' }); return }
+  if (exists.userId !== req.userId! && req.userRole !== 'MASTER') {
+    res.status(403).json({ error: 'Sem permissão para excluir este material' }); return
+  }
   await prisma.catalogMaterial.delete({ where: { id: req.params.id } })
   res.status(204).send()
 })

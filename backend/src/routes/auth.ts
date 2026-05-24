@@ -5,6 +5,7 @@ import { z } from 'zod'
 import prisma from '../lib/prisma'
 
 const router = Router()
+const MASTER_EMAIL = 'welitonviana.sm@gmail.com'
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -30,9 +31,28 @@ router.post('/register', async (req: Request, res: Response) => {
     return
   }
   const hash = await bcrypt.hash(password, 10)
-  const user = await prisma.user.create({ data: { name, email, password: hash } })
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET ?? 'secret', { expiresIn: '7d' })
-  res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email } })
+  const isMaster = email === MASTER_EMAIL
+  const user = await prisma.user.create({
+    data: {
+      name,
+      email,
+      password: hash,
+      role: isMaster ? 'MASTER' : 'CLIENT',
+      status: isMaster ? 'APROVADO' : 'PENDENTE',
+    },
+  })
+
+  if (!isMaster) {
+    res.status(201).json({ message: 'Cadastro realizado. Aguarde a aprovação do administrador.' })
+    return
+  }
+
+  const token = jwt.sign(
+    { userId: user.id, role: user.role },
+    process.env.JWT_SECRET ?? 'secret',
+    { expiresIn: '7d' }
+  )
+  res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, status: user.status } })
 })
 
 router.post('/login', async (req: Request, res: Response) => {
@@ -42,13 +62,31 @@ router.post('/login', async (req: Request, res: Response) => {
     return
   }
   const { email, password } = parsed.data
-  const user = await prisma.user.findUnique({ where: { email } })
+  let user = await prisma.user.findUnique({ where: { email } })
   if (!user || !(await bcrypt.compare(password, user.password))) {
     res.status(401).json({ error: 'Credenciais inválidas' })
     return
   }
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET ?? 'secret', { expiresIn: '7d' })
-  res.json({ token, user: { id: user.id, name: user.name, email: user.email } })
+
+  // Bootstrap: auto-upgrade master email if role wasn't set correctly (first migration)
+  if (user.email === MASTER_EMAIL && user.role !== 'MASTER') {
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { role: 'MASTER', status: 'APROVADO' },
+    })
+  }
+
+  if (user.role !== 'MASTER' && user.status !== 'APROVADO') {
+    res.status(403).json({ error: 'Aguardando aprovação do administrador' })
+    return
+  }
+
+  const token = jwt.sign(
+    { userId: user.id, role: user.role },
+    process.env.JWT_SECRET ?? 'secret',
+    { expiresIn: '7d' }
+  )
+  res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, status: user.status } })
 })
 
 export default router

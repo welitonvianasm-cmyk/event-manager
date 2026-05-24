@@ -206,10 +206,19 @@ export default function EventPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const qc = useQueryClient()
+  const [showTemplateModal, setShowTemplateModal] = useState(false)
+  const [templateName, setTemplateName] = useState('')
+  const [templateSaved, setTemplateSaved] = useState(false)
 
   const { data: event, isLoading } = useQuery({
     queryKey: ['event', id],
     queryFn: () => api.get(`/events/${id}`).then(r => r.data),
+  })
+
+  const { data: guestsCount = 0 } = useQuery<number>({
+    queryKey: ['guests-count', id],
+    queryFn: () => api.get(`/events/${id}/guests`).then(r => r.data.length),
+    enabled: !!id,
   })
 
   const { data: deadlines = [] } = useQuery<any[]>({
@@ -227,6 +236,15 @@ export default function EventPage() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['events'] }); navigate('/') },
   })
 
+  const saveTemplate = useMutation({
+    mutationFn: (name: string) => api.post(`/templates/from-event/${id}`, { name }),
+    onSuccess: () => {
+      setShowTemplateModal(false)
+      setTemplateSaved(true)
+      setTimeout(() => setTemplateSaved(false), 3000)
+    },
+  })
+
   if (isLoading) return <p className="text-sm text-gray-400">Carregando...</p>
   if (!event) return <p className="text-sm text-red-400">Evento não encontrado</p>
 
@@ -240,6 +258,7 @@ export default function EventPage() {
     { to: `/events/${id}/checklist`, label: 'Checklist', icon: '✅', desc: `${done}/${allItems.length} itens` },
     { to: `/events/${id}/suppliers`, label: 'Fornecedores', icon: '🏪', desc: `${event.eventSuppliers?.length ?? 0} itens` },
     { to: `/events/${id}/script`, label: 'Minuto a Minuto', icon: '⏱️', desc: `${event.scriptDays?.length ?? 0} dia(s)` },
+    { to: `/events/${id}/guests`, label: 'Convidados', icon: '👥', desc: `${guestsCount} convidados` },
   ]
 
   return (
@@ -266,13 +285,17 @@ export default function EventPage() {
               {event.participants && ` · ${event.participants} participantes`}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
             <select value={event.status} onChange={e => updateStatus.mutate(e.target.value)}
               className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="RASCUNHO">Rascunho</option>
               <option value="EM_ANDAMENTO">Em andamento</option>
               <option value="CONCLUIDO">Concluído</option>
             </select>
+            <button onClick={() => { setTemplateName(event.name); setShowTemplateModal(true) }}
+              className="text-sm text-indigo-600 hover:text-indigo-800 px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50">
+              Salvar como Template
+            </button>
             <button onClick={() => { if (confirm('Excluir este evento?')) deleteEvent.mutate() }}
               className="text-sm text-red-400 hover:text-red-600 px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50">
               Excluir
@@ -301,6 +324,42 @@ export default function EventPage() {
           </Link>
         ))}
       </div>
+
+      {/* Template saved confirmation */}
+      {templateSaved && (
+        <div className="mb-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700">
+          Template salvo com sucesso! Veja em <a href="/templates" className="underline font-medium">Templates</a>.
+        </div>
+      )}
+
+      {/* Save as Template modal */}
+      {showTemplateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 className="font-bold text-gray-900 mb-4">Salvar como Template</h3>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Nome do template</label>
+            <input
+              value={templateName}
+              onChange={e => setTemplateName(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              placeholder="Ex: Imersão Presencial Padrão"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button onClick={() => setShowTemplateModal(false)}
+                className="flex-1 border border-gray-300 rounded-lg py-2 text-sm text-gray-600 hover:bg-gray-50">
+                Cancelar
+              </button>
+              <button
+                onClick={() => { if (templateName.trim().length >= 2) saveTemplate.mutate(templateName.trim()) }}
+                disabled={templateName.trim().length < 2 || saveTemplate.isPending}
+                className="flex-1 bg-indigo-600 text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50 hover:bg-indigo-700">
+                {saveTemplate.isPending ? 'Salvando...' : 'Salvar Template'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Calendar + People side by side */}
       <div className="grid gap-6 lg:grid-cols-2">

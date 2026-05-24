@@ -17,8 +17,13 @@ export default function LoginPage() {
     try {
       await login(email, password)
       navigate('/')
-    } catch {
-      setError('E-mail ou senha inválidos')
+    } catch (err: any) {
+      const msg = err?.response?.data?.error
+      if (msg === 'Aguardando aprovação do administrador') {
+        setError('Seu cadastro está aguardando aprovação do administrador.')
+      } else {
+        setError('E-mail ou senha inválidos')
+      }
     } finally {
       setLoading(false)
     }
@@ -29,7 +34,7 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 w-full max-w-sm">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">EventManager</h1>
         <p className="text-gray-500 text-sm mb-6">Acesse sua conta</p>
-        {error && <p className="text-red-500 text-sm mb-4 bg-red-50 rounded-lg p-3">{error}</p>}
+        {error && <p className="text-sm mb-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-3">{error}</p>}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>

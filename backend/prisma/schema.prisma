@@ -12,6 +12,8 @@ model User {
   name      String
   email     String   @unique
   password  String
+  role      String   @default("CLIENT")   // CLIENT | MASTER
+  status    String   @default("APROVADO") // PENDENTE | APROVADO | REVOGADO
   createdAt DateTime @default(now())
 
   events           Event[]
@@ -29,6 +31,7 @@ model CatalogSupplier {
   phone       String?
   email       String?
   contactName String?
+  address     String?
   notes       String?
   createdAt   DateTime @default(now())
 
@@ -73,6 +76,7 @@ model Event {
   scriptDays        ScriptDay[]
   communications    CommunicationTemplate[]
   people            EventPerson[]
+  guests            EventGuest[]
 }
 
 // ─── Pessoas / Equipe do evento ───────────────────────────────────────────────
@@ -236,6 +240,20 @@ model TemplateScriptItem {
   responsible String?
   type        String            @default("OUTRO")
   notes       String?
+}
+
+// ─── Guest List ───────────────────────────────────────────────────────────────
+
+model EventGuest {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String?
+  email     String?
+  confirmed Boolean  @default(false)
+  checkedIn Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 // Communications module — schema ready, UI pending
