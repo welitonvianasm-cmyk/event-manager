@@ -6,13 +6,13 @@ import { useAuth } from '../contexts/AuthContext'
 
 const statusLabel: Record<string, string> = { PENDENTE: 'Pendente', APROVADO: 'Aprovado', REVOGADO: 'Revogado' }
 const statusColor: Record<string, string> = {
-  PENDENTE: 'bg-yellow-100 text-yellow-700',
-  APROVADO: 'bg-green-100 text-green-700',
-  REVOGADO: 'bg-red-100 text-red-700',
+  PENDENTE: 'bg-amber-500/20 text-amber-400',
+  APROVADO: 'bg-emerald-500/20 text-emerald-400',
+  REVOGADO: 'bg-red-500/20 text-red-400',
 }
 const roleColor: Record<string, string> = {
-  MASTER: 'bg-purple-100 text-purple-700',
-  CLIENT: 'bg-gray-100 text-gray-600',
+  MASTER: 'bg-purple-500/20 text-purple-400',
+  CLIENT: 'bg-gray-700 text-gray-400',
 }
 
 export default function AdminPage() {
@@ -54,36 +54,36 @@ export default function AdminPage() {
     setTimeout(() => { navigate('/'); window.location.reload() }, 500)
   }
 
-  if (isLoading) return <p className="text-sm text-gray-400">Carregando...</p>
+  if (isLoading) return <p className="text-sm text-gray-500">Carregando...</p>
 
   const pending = users.filter((u: any) => u.status === 'PENDENTE')
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Painel Administrativo</h1>
+      <h1 className="text-2xl font-bold text-white mb-6">Painel Administrativo</h1>
 
       {msg && (
-        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-700">{msg}</div>
+        <div className="mb-4 bg-blue-900/30 border border-blue-700 rounded-xl px-4 py-3 text-sm text-blue-300">{msg}</div>
       )}
 
       {pending.length > 0 && (
-        <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-          <p className="text-sm font-semibold text-yellow-800 mb-1">{pending.length} usuário(s) aguardando aprovação</p>
+        <div className="mb-6 bg-amber-900/30 border border-amber-700 rounded-xl p-4">
+          <p className="text-sm font-semibold text-amber-300 mb-1">{pending.length} usuário(s) aguardando aprovação</p>
           <div className="flex flex-col gap-1">
             {pending.map((u: any) => (
               <div key={u.id} className="flex items-center justify-between text-sm">
-                <span className="text-yellow-900">{u.name} — {u.email}</span>
+                <span className="text-amber-200">{u.name} — {u.email}</span>
                 <button onClick={() => approve.mutate(u.id)} disabled={approve.isPending}
-                  className="text-green-700 hover:text-green-900 font-medium ml-4">Aprovar</button>
+                  className="text-emerald-400 hover:text-emerald-300 font-medium ml-4">Aprovar</button>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-gray-800 border-b border-gray-700">
             <tr>
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Usuário</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Role</th>
@@ -96,22 +96,22 @@ export default function AdminPage() {
             {users.map((u: any) => {
               const isMe = u.id === user?.id
               return (
-                <tr key={u.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
+                <tr key={u.id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/50">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900">{u.name}</p>
-                    <p className="text-xs text-gray-400">{u.email}</p>
+                    <p className="font-medium text-white">{u.name}</p>
+                    <p className="text-xs text-gray-500">{u.email}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${roleColor[u.role] ?? 'bg-gray-100 text-gray-600'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${roleColor[u.role] ?? 'bg-gray-700 text-gray-400'}`}>
                       {u.role}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor[u.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor[u.status] ?? 'bg-gray-700 text-gray-500'}`}>
                       {statusLabel[u.status] ?? u.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-400">
+                  <td className="px-4 py-3 text-xs text-gray-500">
                     {new Date(u.createdAt).toLocaleDateString('pt-BR')}
                   </td>
                   <td className="px-4 py-3">
@@ -119,19 +119,19 @@ export default function AdminPage() {
                       <div className="flex items-center gap-3 justify-end">
                         {u.status === 'PENDENTE' && (
                           <button onClick={() => approve.mutate(u.id)} disabled={approve.isPending}
-                            className="text-xs text-green-600 hover:text-green-800 font-medium">Aprovar</button>
+                            className="text-xs text-emerald-400 hover:text-emerald-300 font-medium">Aprovar</button>
                         )}
                         {u.status === 'APROVADO' && u.role !== 'MASTER' && (
                           <button onClick={() => revoke.mutate(u.id)} disabled={revoke.isPending}
-                            className="text-xs text-orange-500 hover:text-orange-700 font-medium">Revogar</button>
+                            className="text-xs text-amber-400 hover:text-amber-300 font-medium">Revogar</button>
                         )}
                         {u.role !== 'MASTER' && (
                           <>
                             <button onClick={() => impersonate(u)}
-                              className="text-xs text-blue-500 hover:text-blue-700 font-medium">Entrar como</button>
+                              className="text-xs text-blue-400 hover:text-blue-300 font-medium">Entrar como</button>
                             <button onClick={() => { if (confirm(`Excluir ${u.name}?`)) remove.mutate(u.id) }}
                               disabled={remove.isPending}
-                              className="text-xs text-red-400 hover:text-red-600">Excluir</button>
+                              className="text-xs text-red-500 hover:text-red-400">Excluir</button>
                           </>
                         )}
                       </div>
@@ -143,7 +143,7 @@ export default function AdminPage() {
           </tbody>
         </table>
         {users.length === 0 && (
-          <p className="text-center text-sm text-gray-400 py-8">Nenhum usuário cadastrado</p>
+          <p className="text-center text-sm text-gray-600 py-8">Nenhum usuário cadastrado</p>
         )}
       </div>
     </div>

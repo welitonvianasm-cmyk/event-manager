@@ -55,9 +55,9 @@ export default function NewEventPage() {
         {[1, 2, 3, 4].map(s => (
           <div key={s} className="flex items-center gap-2">
             <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-              s === step ? 'bg-blue-600 text-white' : s < step ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+              s === step ? 'bg-blue-600 text-white' : s < step ? 'bg-emerald-500 text-white' : 'bg-gray-700 text-gray-500'
             }`}>{s < step ? '✓' : s}</div>
-            {s < 4 && <div className={`h-0.5 w-8 ${s < step ? 'bg-green-400' : 'bg-gray-200'}`} />}
+            {s < 4 && <div className={`h-0.5 w-8 ${s < step ? 'bg-emerald-500' : 'bg-gray-700'}`} />}
           </div>
         ))}
         <span className="ml-2 text-sm text-gray-500">
@@ -68,17 +68,17 @@ export default function NewEventPage() {
       {/* Step 1: Event type */}
       {step === 1 && (
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-1">Tipo de evento</h2>
+          <h2 className="text-xl font-bold text-white mb-1">Tipo de evento</h2>
           <p className="text-sm text-gray-500 mb-6">Isso define o checklist e o roteiro gerados automaticamente</p>
           <div className="grid gap-3">
             {typeOptions.map(opt => (
               <button key={opt.value} onClick={() => { setEventType(opt.value); handleNext() }}
-                className={`flex items-center gap-4 p-4 border-2 rounded-xl text-left transition-all hover:border-blue-400 ${
-                  eventType === opt.value ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white'
+                className={`flex items-center gap-4 p-4 border-2 rounded-xl text-left transition-all hover:border-blue-500 ${
+                  eventType === opt.value ? 'border-blue-600 bg-blue-900/20' : 'border-gray-700 bg-gray-900'
                 }`}>
                 <span className="text-3xl">{opt.icon}</span>
                 <div>
-                  <div className="font-semibold text-gray-900">{opt.label}</div>
+                  <div className="font-semibold text-white">{opt.label}</div>
                   <div className="text-sm text-gray-500">{opt.desc}</div>
                 </div>
               </button>
@@ -90,65 +90,65 @@ export default function NewEventPage() {
       {/* Step 2: Duration */}
       {step === 2 && (
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-1">Duração do evento</h2>
+          <h2 className="text-xl font-bold text-white mb-1">Duração do evento</h2>
           <p className="text-sm text-gray-500 mb-6">O roteiro será dividido em abas por dia</p>
           <div className="grid grid-cols-3 gap-3">
             {dayOptions.map(opt => (
               <button key={opt.value} onClick={() => { setTotalDays(opt.value); handleNext() }}
-                className={`p-6 border-2 rounded-xl text-center font-bold text-lg transition-all hover:border-blue-400 ${
-                  totalDays === opt.value ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 bg-white text-gray-700'
+                className={`p-6 border-2 rounded-xl text-center font-bold text-lg transition-all hover:border-blue-500 ${
+                  totalDays === opt.value ? 'border-blue-600 bg-blue-900/20 text-blue-400' : 'border-gray-700 bg-gray-900 text-gray-300'
                 }`}>{opt.label}</button>
             ))}
           </div>
-          <button onClick={handleBack} className="mt-4 text-sm text-gray-500 hover:text-gray-700">← Voltar</button>
+          <button onClick={handleBack} className="mt-4 text-sm text-gray-500 hover:text-gray-300">← Voltar</button>
         </div>
       )}
 
       {/* Step 3: Event info */}
       {step === 3 && (
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-1">Informações do evento</h2>
+          <h2 className="text-xl font-bold text-white mb-1">Informações do evento</h2>
           <p className="text-sm text-gray-500 mb-6">Dados gerais do evento</p>
           <div className="flex flex-col gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome do evento *</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Nome do evento *</label>
               <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data de início *</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Data de início *</label>
                 <input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} required
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data de encerramento *</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Data de encerramento *</label>
                 <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} required
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
             </div>
             {(eventType === 'PRESENCIAL' || eventType === 'HIBRIDO') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Local</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Local</label>
                 <input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} placeholder="Endereço ou nome do local"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
             )}
             {(eventType === 'ONLINE' || eventType === 'HIBRIDO') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Link da plataforma</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Link da plataforma</label>
                 <input value={form.onlineUrl} onChange={e => setForm(f => ({ ...f, onlineUrl: e.target.value }))} placeholder="https://zoom.us/..."
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nº de participantes</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Nº de participantes</label>
               <input type="number" value={form.participants} onChange={e => setForm(f => ({ ...f, participants: e.target.value }))} min={1}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           </div>
           <div className="flex gap-3 mt-6">
-            <button onClick={handleBack} className="text-sm text-gray-500 hover:text-gray-700">← Voltar</button>
+            <button onClick={handleBack} className="text-sm text-gray-500 hover:text-gray-300">← Voltar</button>
             <button onClick={() => form.name && form.startDate && form.endDate && handleNext()}
               className="ml-auto bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
               Próximo →
@@ -160,39 +160,39 @@ export default function NewEventPage() {
       {/* Step 4: Template */}
       {step === 4 && (
         <form onSubmit={handleSubmit}>
-          <h2 className="text-xl font-bold text-gray-900 mb-1">Template (opcional)</h2>
+          <h2 className="text-xl font-bold text-white mb-1">Template (opcional)</h2>
           <p className="text-sm text-gray-500 mb-6">Reutilize a estrutura de um evento anterior ou comece do zero</p>
           <div className="grid gap-3 mb-6">
             <button type="button" onClick={() => setTemplateId('')}
-              className={`flex items-center gap-3 p-4 border-2 rounded-xl text-left transition-all hover:border-blue-400 ${
-                !templateId ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white'
+              className={`flex items-center gap-3 p-4 border-2 rounded-xl text-left transition-all hover:border-blue-500 ${
+                !templateId ? 'border-blue-600 bg-blue-900/20' : 'border-gray-700 bg-gray-900'
               }`}>
               <span className="text-2xl">✨</span>
               <div>
-                <div className="font-semibold text-gray-900">Começar do zero</div>
+                <div className="font-semibold text-white">Começar do zero</div>
                 <div className="text-sm text-gray-500">Checklist e roteiro gerados pelo sistema</div>
               </div>
             </button>
             {templates?.map((t: { id: string; name: string; eventType: string; totalDays: number }) => (
               <button key={t.id} type="button" onClick={() => setTemplateId(t.id)}
-                className={`flex items-center gap-3 p-4 border-2 rounded-xl text-left transition-all hover:border-blue-400 ${
-                  templateId === t.id ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white'
+                className={`flex items-center gap-3 p-4 border-2 rounded-xl text-left transition-all hover:border-blue-500 ${
+                  templateId === t.id ? 'border-blue-600 bg-blue-900/20' : 'border-gray-700 bg-gray-900'
                 }`}>
                 <span className="text-2xl">📋</span>
                 <div>
-                  <div className="font-semibold text-gray-900">{t.name}</div>
+                  <div className="font-semibold text-white">{t.name}</div>
                   <div className="text-sm text-gray-500">{t.eventType} · {t.totalDays} dia(s)</div>
                 </div>
               </button>
             ))}
           </div>
           {mutation.isError && (
-            <p className="text-red-500 text-sm mb-4 bg-red-50 rounded-lg p-3">Erro ao criar evento. Tente novamente.</p>
+            <p className="text-red-400 text-sm mb-4 bg-red-900/30 border border-red-800 rounded-lg p-3">Erro ao criar evento. Tente novamente.</p>
           )}
           <div className="flex gap-3">
-            <button type="button" onClick={handleBack} className="text-sm text-gray-500 hover:text-gray-700">← Voltar</button>
+            <button type="button" onClick={handleBack} className="text-sm text-gray-500 hover:text-gray-300">← Voltar</button>
             <button type="submit" disabled={mutation.isPending}
-              className="ml-auto bg-green-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50">
+              className="ml-auto bg-emerald-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50">
               {mutation.isPending ? 'Criando...' : 'Criar Evento'}
             </button>
           </div>
