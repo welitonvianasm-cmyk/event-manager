@@ -11,7 +11,7 @@ function ImpersonationBanner() {
     const adminToken = localStorage.getItem('adminToken')
     if (adminToken) {
       localStorage.setItem('token', adminToken)
-      localStorage.setItem('user', adminUser)
+      localStorage.setItem('user', adminUser!)
     }
     localStorage.removeItem('adminToken')
     localStorage.removeItem('adminUser')
