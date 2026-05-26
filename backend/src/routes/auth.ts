@@ -2,10 +2,19 @@ import { Router, Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { z } from 'zod'
+import rateLimit from 'express-rate-limit'
 import prisma from '../lib/prisma'
 
 const router = Router()
 const MASTER_EMAIL = 'welitonviana.sm@gmail.com'
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -55,7 +64,7 @@ router.post('/register', async (req: Request, res: Response) => {
   res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, status: user.status } })
 })
 
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', loginLimiter, async (req: Request, res: Response) => {
   const parsed = loginSchema.safeParse(req.body)
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() })
