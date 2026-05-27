@@ -170,6 +170,53 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       ...(endDate ? { endDate: new Date(endDate) } : {}),
     },
   })
+
+  // Sync script days when totalDays changed
+  if (parsed.data.totalDays !== undefined && parsed.data.totalDays !== exists.totalDays) {
+    const newTotal = parsed.data.totalDays
+    const oldTotal = exists.totalDays
+    const eventType = (parsed.data.eventType ?? exists.eventType) as string
+    const defaultScript = eventType === 'ONLINE' ? defaultScriptOnline : defaultScriptPresencial
+
+    if (newTotal > oldTotal) {
+      // Going multi-day: add label to day 1 if it didn't have one
+      if (oldTotal === 1) {
+        await prisma.scriptDay.updateMany({
+          where: { eventId: req.params.id, dayNumber: 1 },
+          data: { label: 'Dia 1' },
+        })
+      }
+      // Create missing days with default script
+      for (let day = oldTotal + 1; day <= newTotal; day++) {
+        const existing = await prisma.scriptDay.findUnique({
+          where: { eventId_dayNumber: { eventId: req.params.id, dayNumber: day } },
+        })
+        if (!existing) {
+          const scriptDay = await prisma.scriptDay.create({
+            data: { eventId: req.params.id, dayNumber: day, label: `Dia ${day}` },
+          })
+          for (const [ii, item] of defaultScript.entries()) {
+            await prisma.scriptItem.create({
+              data: { scriptDayId: scriptDay.id, order: ii, startTime: item.startTime, endTime: item.endTime, title: item.title, type: item.type },
+            })
+          }
+        }
+      }
+    } else {
+      // Remove extra days (ScriptItems cascade automatically)
+      await prisma.scriptDay.deleteMany({
+        where: { eventId: req.params.id, dayNumber: { gt: newTotal } },
+      })
+      // Back to single day: clear label
+      if (newTotal === 1) {
+        await prisma.scriptDay.updateMany({
+          where: { eventId: req.params.id, dayNumber: 1 },
+          data: { label: null },
+        })
+      }
+    }
+  }
+
   res.json(updated)
 })
 
