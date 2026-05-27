@@ -24,6 +24,21 @@ export default function GuestListPage() {
     queryFn: () => api.get(`/events/${id}/ticket-sales`).then(r => r.data),
   })
 
+  const { data: ticketTypes = [] } = useQuery<any[]>({
+    queryKey: ['ticket-types', id],
+    queryFn: () => api.get(`/events/${id}/ticket-types`).then(r => r.data),
+  })
+
+  const linkTicketSale = useMutation({
+    mutationFn: (data: object) => api.post(`/events/${id}/ticket-sales`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['ticket-sales', id] })
+      setLinkingGuest(null)
+      setLinkTicketTypeId('')
+      setLinkIsCourtesy(false)
+    },
+  })
+
   const [showAddForm, setShowAddForm] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', email: '' })
   const [showImport, setShowImport] = useState(false)
@@ -32,6 +47,9 @@ export default function GuestListPage() {
   const [importing, setImporting] = useState(false)
   const [search, setSearch] = useState('')
   const [ticketFilter, setTicketFilter] = useState<TicketFilter>('all')
+  const [linkingGuest, setLinkingGuest] = useState<any | null>(null)
+  const [linkTicketTypeId, setLinkTicketTypeId] = useState('')
+  const [linkIsCourtesy, setLinkIsCourtesy] = useState(false)
 
   const saleByGuestId = useMemo(() => {
     const map: Record<string, any> = {}
@@ -212,6 +230,58 @@ export default function GuestListPage() {
         </div>
       )}
 
+      {/* Vincular convite modal */}
+      {linkingGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 className="font-bold text-white mb-1">Vincular Convite</h3>
+            <p className="text-xs text-gray-500 mb-4">{linkingGuest.name}</p>
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1">Tipo de Convite *</label>
+                <select
+                  value={linkTicketTypeId}
+                  onChange={e => setLinkTicketTypeId(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Selecione...</option>
+                  {ticketTypes.map((tt: any) => (
+                    <option key={tt.id} value={tt.id}>
+                      {tt.name} — {tt.lot}º lote {tt.isCourtesy ? '(Cortesia)' : `R$ ${tt.price.toFixed(2)}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={linkIsCourtesy} onChange={e => setLinkIsCourtesy(e.target.checked)}
+                  className="w-4 h-4 accent-purple-500" />
+                <span className="text-sm text-gray-300">Cortesia (valor zerado)</span>
+              </label>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => { setLinkingGuest(null); setLinkTicketTypeId(''); setLinkIsCourtesy(false) }}
+                className="flex-1 border border-gray-600 rounded-lg py-2 text-sm text-gray-400 hover:bg-gray-800">Cancelar</button>
+              <button
+                disabled={!linkTicketTypeId || linkTicketSale.isPending}
+                onClick={() => {
+                  const tt = ticketTypes.find((t: any) => t.id === linkTicketTypeId)
+                  if (!tt) return
+                  const unitPrice = linkIsCourtesy ? 0 : tt.price
+                  linkTicketSale.mutate({
+                    ticketTypeId: tt.id,
+                    guestId: linkingGuest.id,
+                    guestName: linkingGuest.name,
+                    quantity: 1,
+                    unitPrice,
+                  })
+                }}
+                className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50">
+                {linkTicketSale.isPending ? 'Salvando...' : 'Vincular'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Import modal */}
       {showImport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
@@ -299,6 +369,12 @@ export default function GuestListPage() {
                         sale.unitPrice === 0
                           ? <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">Cortesia</span>
                           : <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">{sale.ticketType?.name ?? 'Pagante'}</span>
+                      ) : ticketTypes.length > 0 ? (
+                        <button
+                          onClick={() => { setLinkingGuest(g); setLinkTicketTypeId(''); setLinkIsCourtesy(false) }}
+                          className="text-xs text-blue-400 hover:text-blue-300 border border-blue-800/60 rounded-full px-2 py-0.5 hover:bg-blue-900/20">
+                          + Vincular
+                        </button>
                       ) : (
                         <span className="text-xs text-gray-600">—</span>
                       )}

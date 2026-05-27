@@ -320,10 +320,10 @@ export default function EventPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-6">
         {navItems.map(item => (
           <Link key={item.to} to={item.to}
-            className="bg-gray-900 border border-gray-700 rounded-2xl p-5 hover:border-gray-600 hover:bg-gray-800 transition-colors flex items-center gap-4">
-            <span className="text-3xl">{item.icon}</span>
+            className="bg-gray-900 border border-gray-700 rounded-2xl p-5 hover:border-gray-600 hover:bg-gray-800 transition-colors flex flex-col items-center justify-center text-center gap-2 min-h-[100px]">
+            <span className="text-2xl">{item.icon}</span>
             <div>
-              <div className="font-semibold text-white">{item.label}</div>
+              <div className="font-semibold text-white text-sm">{item.label}</div>
               <div className="text-xs text-gray-500">{item.desc}</div>
             </div>
           </Link>
