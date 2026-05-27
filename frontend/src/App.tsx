@@ -13,6 +13,7 @@ import TemplatesPage from './pages/TemplatesPage'
 import AdminPage from './pages/AdminPage'
 import GuestListPage from './pages/GuestListPage'
 import TicketSalesPage from './pages/TicketSalesPage'
+import EventEditPage from './pages/EventEditPage'
 import Layout from './components/Layout'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="events/:id/script" element={<ScriptPage />} />
         <Route path="events/:id/guests" element={<GuestListPage />} />
         <Route path="events/:id/sales" element={<TicketSalesPage />} />
+        <Route path="events/:id/edit" element={<EventEditPage />} />
         <Route path="catalog" element={<CatalogPage />} />
         <Route path="templates" element={<TemplatesPage />} />
         <Route path="admin" element={<MasterRoute><AdminPage /></MasterRoute>} />

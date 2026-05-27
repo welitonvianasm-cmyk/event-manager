@@ -293,6 +293,10 @@ export default function EventPage() {
               <option value="EM_ANDAMENTO">Em andamento</option>
               <option value="CONCLUIDO">Concluído</option>
             </select>
+            <Link to={`/events/${id}/edit`}
+              className="text-sm text-gray-300 hover:text-white px-3 py-1.5 border border-gray-600 rounded-lg hover:bg-gray-800">
+              ✏️ Editar
+            </Link>
             <button onClick={() => { setTemplateName(event.name); setShowTemplateModal(true) }}
               className="text-sm text-indigo-400 hover:text-indigo-300 px-3 py-1.5 border border-indigo-700 rounded-lg hover:bg-indigo-900/30">
               Salvar como Template
