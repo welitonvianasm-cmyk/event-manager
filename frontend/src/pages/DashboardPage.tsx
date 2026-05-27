@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import api from '../api/client'
 
 interface Event {
@@ -53,11 +53,45 @@ function buildChartData(events: Event[]) {
   return months
 }
 
+interface SalesSummary {
+  ticketRevenue: number
+  offerRevenue: number
+  totalExpenses: number
+}
+
+function useSalesSummaries(eventIds: string[]) {
+  return useQuery<Record<string, SalesSummary>>({
+    queryKey: ['sales-summaries', eventIds],
+    queryFn: async () => {
+      const results: Record<string, SalesSummary> = {}
+      await Promise.all(
+        eventIds.map(async (eid) => {
+          try {
+            const { data } = await api.get(`/events/${eid}/sales-summary`)
+            results[eid] = data
+          } catch {
+            results[eid] = { ticketRevenue: 0, offerRevenue: 0, totalExpenses: 0 }
+          }
+        })
+      )
+      return results
+    },
+    enabled: eventIds.length > 0,
+  })
+}
+
+function fmt(v: number) {
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
+}
+
 export default function DashboardPage() {
   const { data: events, isLoading } = useQuery<Event[]>({
     queryKey: ['events'],
     queryFn: () => api.get('/events').then(r => r.data),
   })
+
+  const eventIds = events?.map(e => e.id) ?? []
+  const { data: summaries } = useSalesSummaries(eventIds)
 
   if (isLoading) return <p className="text-gray-500 text-sm">Carregando...</p>
 
@@ -65,6 +99,20 @@ export default function DashboardPage() {
   const emAndamento = events?.filter(e => e.status === 'EM_ANDAMENTO').length ?? 0
   const concluido = events?.filter(e => e.status === 'CONCLUIDO').length ?? 0
   const chartData = buildChartData(events ?? [])
+
+  const totalTicketRevenue = Object.values(summaries ?? {}).reduce((s, v) => s + v.ticketRevenue, 0)
+  const totalOfferRevenue = Object.values(summaries ?? {}).reduce((s, v) => s + v.offerRevenue, 0)
+  const totalExpenses = Object.values(summaries ?? {}).reduce((s, v) => s + v.totalExpenses, 0)
+
+  const salesBarData = events
+    ?.filter(e => summaries?.[e.id])
+    .map(e => ({
+      name: e.name.length > 14 ? e.name.slice(0, 13) + '…' : e.name,
+      Gastos: Math.round(summaries![e.id].totalExpenses),
+      Convites: Math.round(summaries![e.id].ticketRevenue),
+      Oferta: Math.round(summaries![e.id].offerRevenue),
+    }))
+    .filter(d => d.Gastos || d.Convites || d.Oferta) ?? []
 
   return (
     <div>
@@ -118,6 +166,46 @@ export default function DashboardPage() {
             </AreaChart>
           </ResponsiveContainer>
         </div>
+      )}
+
+      {/* Revenue summary */}
+      {summaries && salesBarData.length > 0 && (
+        <>
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Receita Convites</p>
+              <p className="text-2xl font-bold text-emerald-400">{fmt(totalTicketRevenue)}</p>
+            </div>
+            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Receita Oferta</p>
+              <p className="text-2xl font-bold text-blue-400">{fmt(totalOfferRevenue)}</p>
+            </div>
+            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Gastos Totais</p>
+              <p className="text-2xl font-bold text-red-400">{fmt(totalExpenses)}</p>
+            </div>
+          </div>
+
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 mb-6">
+            <p className="text-sm font-semibold text-gray-300 mb-4">Gastos vs Receita por Evento</p>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={salesBarData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => fmt(v).replace('R$ ', 'R$')} />
+                <Tooltip
+                  contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 8, color: '#f9fafb', fontSize: 12 }}
+                  labelStyle={{ color: '#9ca3af' }}
+                  formatter={(v: number) => fmt(v)}
+                />
+                <Legend wrapperStyle={{ color: '#6b7280', fontSize: 12 }} />
+                <Bar dataKey="Gastos" fill="#f87171" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Convites" fill="#34d399" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Oferta" fill="#60a5fa" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </>
       )}
 
       {/* Events grid */}

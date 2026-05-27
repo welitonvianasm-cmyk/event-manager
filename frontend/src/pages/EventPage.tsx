@@ -259,6 +259,7 @@ export default function EventPage() {
     { to: `/events/${id}/suppliers`, label: 'Fornecedores', icon: '🏪', desc: `${event.eventSuppliers?.length ?? 0} itens` },
     { to: `/events/${id}/script`, label: 'Minuto a Minuto', icon: '⏱️', desc: `${event.scriptDays?.length ?? 0} dia(s)` },
     { to: `/events/${id}/guests`, label: 'Convidados', icon: '👥', desc: `${guestsCount} convidados` },
+    { to: `/events/${id}/sales`, label: 'Vendas', icon: '💰', desc: 'convites + ofertas' },
   ]
 
   return (
@@ -312,7 +313,7 @@ export default function EventPage() {
       </div>
 
       {/* Nav cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-6">
         {navItems.map(item => (
           <Link key={item.to} to={item.to}
             className="bg-gray-900 border border-gray-700 rounded-2xl p-5 hover:border-gray-600 hover:bg-gray-800 transition-colors flex items-center gap-4">

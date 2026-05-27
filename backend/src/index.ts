@@ -11,6 +11,7 @@ import communicationRoutes from './routes/communications'
 import peopleRoutes from './routes/people'
 import calendarRoutes from './routes/calendar'
 import guestRoutes from './routes/guests'
+import salesRoutes from './routes/sales'
 import adminRoutes from './routes/admin'
 
 const app = express()
@@ -33,6 +34,7 @@ app.use('/events', communicationRoutes)
 app.use('/events', peopleRoutes)
 app.use('/events', calendarRoutes)
 app.use('/events', guestRoutes)
+app.use('/events', salesRoutes)
 app.use('/catalog', catalogRoutes)
 app.use('/templates', templateRoutes)
 app.use('/admin', adminRoutes)

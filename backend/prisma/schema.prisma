@@ -77,6 +77,9 @@ model Event {
   communications    CommunicationTemplate[]
   people            EventPerson[]
   guests            EventGuest[]
+  ticketTypes       TicketType[]
+  ticketSales       TicketSale[]
+  offerSales        OfferSale[]
 }
 
 // ─── Pessoas / Equipe do evento ───────────────────────────────────────────────
@@ -254,6 +257,9 @@ model EventGuest {
   confirmed Boolean  @default(false)
   checkedIn Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  ticketSales TicketSale[]
+  offerSales  OfferSale[]
 }
 
 // Communications module — schema ready, UI pending
@@ -268,4 +274,50 @@ model CommunicationTemplate {
   body        String
   sentAt      DateTime?
   createdAt   DateTime  @default(now())
+}
+
+// ─── Sales Module ─────────────────────────────────────────────────────────────
+
+model TicketType {
+  id          String       @id @default(cuid())
+  eventId     String
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String
+  lot         Int          @default(1)
+  price       Float
+  isCourtesy  Boolean      @default(false)
+  ticketSales TicketSale[]
+  createdAt   DateTime     @default(now())
+}
+
+model TicketSale {
+  id           String      @id @default(cuid())
+  eventId      String
+  event        Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guestId      String?
+  guest        EventGuest? @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  ticketTypeId String
+  ticketType   TicketType  @relation(fields: [ticketTypeId], references: [id], onDelete: Cascade)
+  guestName    String
+  quantity     Int         @default(1)
+  unitPrice    Float
+  totalPrice   Float
+  createdAt    DateTime    @default(now())
+}
+
+model OfferSale {
+  id           String      @id @default(cuid())
+  eventId      String
+  event        Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guestId      String?
+  guest        EventGuest? @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  guestName    String
+  cpf          String?
+  rg           String?
+  address      String?
+  value        Float
+  installments Int?
+  isEntrada    Boolean     @default(false)
+  notes        String?
+  createdAt    DateTime    @default(now())
 }

@@ -53,6 +53,10 @@ router.delete('/users/:id', async (req: AuthRequest, res: Response) => {
     if (materialIds.length) await tx.eventSupplier.updateMany({ where: { catalogMaterialId: { in: materialIds } }, data: { catalogMaterialId: null } })
     await tx.catalogMaterial.deleteMany({ where: { userId: req.params.id } })
     await tx.catalogSupplier.deleteMany({ where: { userId: req.params.id } })
+    // Sales records don't cascade automatically from user — delete before events
+    await tx.offerSale.deleteMany({ where: { event: { userId: req.params.id } } })
+    await tx.ticketSale.deleteMany({ where: { event: { userId: req.params.id } } })
+    await tx.ticketType.deleteMany({ where: { event: { userId: req.params.id } } })
     // Events and templates cascade to their children automatically
     await tx.event.deleteMany({ where: { userId: req.params.id } })
     await tx.eventTemplate.deleteMany({ where: { userId: req.params.id } })
