@@ -148,7 +148,7 @@ function DaySection({ day, eventId, onAdd, onBulkUpdate, onDelete }: {
   eventId: string
   onAdd: () => void
   onBulkUpdate: (updates: any[]) => void
-  onDelete: (itemId: string) => void
+  onDelete: (itemId: string, cascade: { id: string; startTime: string; endTime: string }[]) => void
 }) {
   const [editId, setEditId] = useState<string | null>(null)
   const [editBuf, setEditBuf] = useState<Record<string, string>>({})
@@ -294,8 +294,24 @@ function DaySection({ day, eventId, onAdd, onBulkUpdate, onDelete }: {
                     <span className="text-sm text-gray-400 truncate">{item.responsible ?? '—'}</span>
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={() => startEdit(item)} className="text-xs text-blue-400 hover:text-blue-300">Editar</button>
-                      <button onClick={() => { if (confirm('Excluir?')) onDelete(item.id) }}
-                        className="text-xs text-red-500 hover:text-red-400">✕</button>
+                      <button onClick={() => {
+                        if (!confirm('Excluir?')) return
+                        const idx = items.findIndex((i: any) => i.id === item.id)
+                        const prevItem = idx > 0 ? items[idx - 1] : null
+                        const cascade: { id: string; startTime: string; endTime: string }[] = []
+                        if (prevItem) {
+                          let prevEnd = prevItem.endTime
+                          for (let j = idx + 1; j < items.length; j++) {
+                            const it = items[j]
+                            const dur = durMins(it.startTime, it.endTime)
+                            const newStart = prevEnd
+                            const newEnd = minsToTime(timeToMins(newStart) + dur)
+                            cascade.push({ id: it.id, startTime: newStart, endTime: newEnd })
+                            prevEnd = newEnd
+                          }
+                        }
+                        onDelete(item.id, cascade)
+                      }} className="text-xs text-red-500 hover:text-red-400">✕</button>
                     </div>
                   </>
                 )}
@@ -356,7 +372,6 @@ export default function ScriptPage() {
 
   const deleteItem = useMutation({
     mutationFn: (itemId: string) => api.delete(`/events/${id}/script/items/${itemId}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['script', id] }),
   })
 
   if (isLoading) return <p className="text-sm text-gray-500">Carregando...</p>
@@ -381,7 +396,17 @@ export default function ScriptPage() {
             eventId={id!}
             onAdd={() => setAddingDay(day.dayNumber)}
             onBulkUpdate={(updates) => bulkUpdate.mutate(updates)}
-            onDelete={(itemId) => deleteItem.mutate(itemId)}
+            onDelete={(itemId, cascade) => {
+              deleteItem.mutate(itemId, {
+                onSuccess: () => {
+                  if (cascade.length > 0) {
+                    bulkUpdate.mutate(cascade)
+                  } else {
+                    qc.invalidateQueries({ queryKey: ['script', id] })
+                  }
+                },
+              })
+            }}
           />
         ))
       )}
