@@ -196,7 +196,7 @@ export default function DashboardPage() {
                 <Tooltip
                   contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 8, color: '#f9fafb', fontSize: 12 }}
                   labelStyle={{ color: '#9ca3af' }}
-                  formatter={(v: number) => fmt(v)}
+                  formatter={(v) => typeof v === 'number' ? fmt(v) : String(v)}
                 />
                 <Legend wrapperStyle={{ color: '#6b7280', fontSize: 12 }} />
                 <Bar dataKey="Gastos" fill="#f87171" radius={[4, 4, 0, 0]} />
