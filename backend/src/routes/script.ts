@@ -109,4 +109,24 @@ router.delete('/:id/script/items/:itemId', async (req: AuthRequest, res: Respons
   res.status(204).send()
 })
 
+router.patch('/:id/script/bulk', async (req: AuthRequest, res: Response) => {
+  if (!await assertEventOwner(req.params.id, req.userId!, res)) return
+  const schema = z.object({
+    updates: z.array(z.object({
+      id: z.string(),
+      startTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+      endTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+      order: z.number().int().optional(),
+    })),
+  })
+  const parsed = schema.safeParse(req.body)
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
+  await Promise.all(
+    parsed.data.updates.map(({ id, ...data }) =>
+      prisma.scriptItem.update({ where: { id }, data })
+    )
+  )
+  res.json({ ok: true })
+})
+
 export default router
