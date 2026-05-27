@@ -102,6 +102,8 @@ export default function TicketSalesPage() {
     mutationFn: (data: object) => api.post(`/events/${id}/ticket-sales`, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ticket-sales', id] })
+      qc.invalidateQueries({ queryKey: ['guests', id] })
+      qc.invalidateQueries({ queryKey: ['guests-count', id] })
       setShowTicketModal(false)
       setTicketForm({ guestId: '', guestName: '', ticketTypeId: '', quantity: 1, overrideCourtesy: false })
     },
@@ -165,6 +167,8 @@ export default function TicketSalesPage() {
     mutationFn: (data: object) => api.post(`/events/${id}/offer-sales`, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['offer-sales', id] })
+      qc.invalidateQueries({ queryKey: ['guests', id] })
+      qc.invalidateQueries({ queryKey: ['guests-count', id] })
       setShowOfferModal(false)
     },
   })

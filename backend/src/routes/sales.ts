@@ -101,11 +101,21 @@ router.post('/:id/ticket-sales', async (req: AuthRequest, res: Response) => {
   const parsed = ticketSaleSchema.safeParse(req.body)
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
   const { ticketTypeId, guestId, guestName, quantity, unitPrice } = parsed.data
+
+  // Auto-add to guest list if not already linked
+  let finalGuestId = guestId ?? null
+  if (!finalGuestId) {
+    const newGuest = await prisma.eventGuest.create({
+      data: { eventId: req.params.id, name: guestName },
+    })
+    finalGuestId = newGuest.id
+  }
+
   const sale = await prisma.ticketSale.create({
     data: {
       eventId: req.params.id,
       ticketTypeId,
-      guestId: guestId ?? null,
+      guestId: finalGuestId,
       guestName,
       quantity,
       unitPrice,
@@ -156,9 +166,19 @@ router.post('/:id/offer-sales', async (req: AuthRequest, res: Response) => {
   }
   const parsed = offerSaleSchema.safeParse(req.body)
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
-  const { guestId, ...rest } = parsed.data
+  const { guestId, guestName, ...rest } = parsed.data
+
+  // Auto-add to guest list if not already linked
+  let finalGuestId = guestId ?? null
+  if (!finalGuestId) {
+    const newGuest = await prisma.eventGuest.create({
+      data: { eventId: req.params.id, name: guestName },
+    })
+    finalGuestId = newGuest.id
+  }
+
   const sale = await prisma.offerSale.create({
-    data: { eventId: req.params.id, guestId: guestId ?? null, ...rest },
+    data: { eventId: req.params.id, guestId: finalGuestId, guestName, ...rest },
     include: { guest: true },
   })
   res.status(201).json(sale)
