@@ -53,6 +53,9 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('pt-BR')
 }
 
+const inp = 'w-full bg-white border border-black/[0.08] text-[#1A1A2E] placeholder-[#9CA3AF] rounded-[10px] px-3 py-2 text-sm focus:outline-none focus:border-[#7C5CBF] focus:ring-2 focus:ring-[#EDE9F8]'
+const lbl = 'block text-xs font-bold text-[#6B7280] mb-1'
+
 export default function TicketSalesPage() {
   const { id } = useParams()
   const qc = useQueryClient()
@@ -219,24 +222,24 @@ export default function TicketSalesPage() {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 mb-6 text-sm text-gray-500">
-        <Link to="/" className="hover:text-gray-300">Eventos</Link>
+      <div className="flex items-center gap-2 mb-6 text-sm text-[#9CA3AF]">
+        <Link to="/" className="hover:text-[#7C5CBF] transition-colors">Eventos</Link>
         <span>/</span>
-        <Link to={`/events/${id}`} className="hover:text-gray-300">{event?.name ?? '...'}</Link>
+        <Link to={`/events/${id}`} className="hover:text-[#7C5CBF] transition-colors">{event?.name ?? '...'}</Link>
         <span>/</span>
-        <span className="text-gray-200 font-medium">Vendas</span>
+        <span className="text-[#1A1A2E] font-bold">Vendas</span>
       </div>
 
-      <h1 className="text-2xl font-bold text-white mb-6">Vendas</h1>
+      <h1 className="text-[22px] font-bold text-[#1A1A2E] mb-6">Vendas</h1>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-900 border border-gray-700 rounded-xl p-1 mb-6 w-fit">
+      <div className="flex gap-1 bg-[#F3F2F8] p-1 rounded-[10px] mb-6 w-fit">
         <button onClick={() => setTab('tickets')}
-          className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'tickets' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}>
+          className={`px-5 py-2 rounded-[8px] text-sm font-bold transition-colors ${tab === 'tickets' ? 'bg-white text-[#1A1A2E] shadow-sm' : 'text-[#6B7280] hover:text-[#1A1A2E]'}`}>
           Convites
         </button>
         <button onClick={() => setTab('offers')}
-          className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'offers' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}>
+          className={`px-5 py-2 rounded-[8px] text-sm font-bold transition-colors ${tab === 'offers' ? 'bg-white text-[#1A1A2E] shadow-sm' : 'text-[#6B7280] hover:text-[#1A1A2E]'}`}>
           Oferta do Evento
         </button>
       </div>
@@ -245,61 +248,61 @@ export default function TicketSalesPage() {
       {tab === 'tickets' && (
         <div>
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-emerald-400">{fmt(ticketRevenue)}</p>
-              <p className="text-xs text-gray-500 mt-0.5">Total arrecadado</p>
+            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
+              <p className="text-2xl font-bold text-[#4CD080]">{fmt(ticketRevenue)}</p>
+              <p className="text-xs text-[#9CA3AF] mt-0.5">Total arrecadado</p>
             </div>
-            <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-white">{ticketCount}</p>
-              <p className="text-xs text-gray-500 mt-0.5">Convites vendidos</p>
+            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
+              <p className="text-2xl font-bold text-[#1A1A2E]">{ticketCount}</p>
+              <p className="text-xs text-[#9CA3AF] mt-0.5">Convites vendidos</p>
             </div>
-            <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-purple-400">{courtesyCount}</p>
-              <p className="text-xs text-gray-500 mt-0.5">Cortesias</p>
+            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
+              <p className="text-2xl font-bold text-[#7C5CBF]">{courtesyCount}</p>
+              <p className="text-xs text-[#9CA3AF] mt-0.5">Cortesias</p>
             </div>
           </div>
 
           <div className="flex justify-between items-center mb-4">
-            <p className="text-sm text-gray-500">{ticketSales.length} venda(s) registrada(s)</p>
+            <p className="text-sm text-[#6B7280]">{ticketSales.length} venda(s) registrada(s)</p>
             <button onClick={() => setShowTicketModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+              className="bg-[#7C5CBF] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[#9B7DD4] transition-colors">
               + Registrar Venda
             </button>
           </div>
 
           {ticketSales.length === 0 ? (
-            <div className="text-center py-16 text-gray-600">
+            <div className="text-center py-16 text-[#9CA3AF]">
               <p className="text-4xl mb-3">🎟️</p>
-              <p className="text-sm text-gray-500">Nenhuma venda registrada</p>
+              <p className="text-sm">Nenhuma venda registrada</p>
             </div>
           ) : (
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden">
+            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-gray-800 border-b border-gray-700">
+                <thead className="bg-[#F8F7FC] border-b border-black/[0.08]">
                   <tr>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Convidado</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Tipo / Lote</th>
-                    <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Qtd</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Valor</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Data</th>
+                    <th className="text-left px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Convidado</th>
+                    <th className="text-left px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Tipo / Lote</th>
+                    <th className="text-center px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Qtd</th>
+                    <th className="text-right px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Valor</th>
+                    <th className="text-right px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Data</th>
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {ticketSales.map(s => (
-                    <tr key={s.id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/50">
-                      <td className="px-4 py-3 font-medium text-white">{s.guestName}</td>
+                    <tr key={s.id} className="border-b border-black/[0.06] last:border-0 hover:bg-[#F8F7FC]">
+                      <td className="px-4 py-3 font-bold text-[#1A1A2E]">{s.guestName}</td>
                       <td className="px-4 py-3">
-                        <span className="text-white">{s.ticketType.name}</span>
-                        <span className="text-xs text-gray-500 ml-1">{LOT_LABELS[s.ticketType.lot - 1]} Lote</span>
-                        {s.unitPrice === 0 && <span className="ml-2 text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">Cortesia</span>}
+                        <span className="text-[#1A1A2E]">{s.ticketType.name}</span>
+                        <span className="text-xs text-[#9CA3AF] ml-1">{LOT_LABELS[s.ticketType.lot - 1]} Lote</span>
+                        {s.unitPrice === 0 && <span className="ml-2 text-xs bg-[#EDE9F8] text-[#7C5CBF] px-2 py-0.5 rounded-full font-bold">Cortesia</span>}
                       </td>
-                      <td className="px-4 py-3 text-center text-gray-300">{s.quantity}</td>
-                      <td className="px-4 py-3 text-right text-emerald-400 font-medium">{fmt(s.totalPrice)}</td>
-                      <td className="px-4 py-3 text-right text-gray-500">{fmtDate(s.createdAt)}</td>
+                      <td className="px-4 py-3 text-center text-[#6B7280]">{s.quantity}</td>
+                      <td className="px-4 py-3 text-right text-[#4CD080] font-bold">{fmt(s.totalPrice)}</td>
+                      <td className="px-4 py-3 text-right text-[#9CA3AF]">{fmtDate(s.createdAt)}</td>
                       <td className="px-4 py-3 text-right">
                         <button onClick={() => { if (confirm('Remover esta venda?')) deleteTicketSale.mutate(s.id) }}
-                          className="text-xs text-red-500 hover:text-red-400">✕</button>
+                          className="text-xs text-red-400 hover:text-red-500">✕</button>
                       </td>
                     </tr>
                   ))}
@@ -314,61 +317,61 @@ export default function TicketSalesPage() {
       {tab === 'offers' && (
         <div>
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-emerald-400">{fmt(offerRevenue)}</p>
-              <p className="text-xs text-gray-500 mt-0.5">Total arrecadado</p>
+            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
+              <p className="text-2xl font-bold text-[#4CD080]">{fmt(offerRevenue)}</p>
+              <p className="text-xs text-[#9CA3AF] mt-0.5">Total arrecadado</p>
             </div>
-            <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-white">{offerCount}</p>
-              <p className="text-xs text-gray-500 mt-0.5">Vendas realizadas</p>
+            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
+              <p className="text-2xl font-bold text-[#1A1A2E]">{offerCount}</p>
+              <p className="text-xs text-[#9CA3AF] mt-0.5">Vendas realizadas</p>
             </div>
-            <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-blue-400">{fmt(avgOffer)}</p>
-              <p className="text-xs text-gray-500 mt-0.5">Ticket médio</p>
+            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
+              <p className="text-2xl font-bold text-[#7C5CBF]">{fmt(avgOffer)}</p>
+              <p className="text-xs text-[#9CA3AF] mt-0.5">Ticket médio</p>
             </div>
           </div>
 
           <div className="flex justify-between items-center mb-4">
-            <p className="text-sm text-gray-500">{offerSales.length} venda(s) registrada(s)</p>
+            <p className="text-sm text-[#6B7280]">{offerSales.length} venda(s) registrada(s)</p>
             <button onClick={openNewOffer}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+              className="bg-[#7C5CBF] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[#9B7DD4] transition-colors">
               + Registrar Venda
             </button>
           </div>
 
           {offerSales.length === 0 ? (
-            <div className="text-center py-16 text-gray-600">
+            <div className="text-center py-16 text-[#9CA3AF]">
               <p className="text-4xl mb-3">💰</p>
-              <p className="text-sm text-gray-500">Nenhuma venda de oferta registrada</p>
+              <p className="text-sm">Nenhuma venda de oferta registrada</p>
             </div>
           ) : (
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden">
+            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-gray-800 border-b border-gray-700">
+                <thead className="bg-[#F8F7FC] border-b border-black/[0.08]">
                   <tr>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Nome</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">CPF</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Valor</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Pagamento</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Data</th>
+                    <th className="text-left px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Nome</th>
+                    <th className="text-left px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">CPF</th>
+                    <th className="text-right px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Valor</th>
+                    <th className="text-left px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Pagamento</th>
+                    <th className="text-right px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Data</th>
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {offerSales.map(o => (
-                    <tr key={o.id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/50">
-                      <td className="px-4 py-3 font-medium text-white">{o.guestName}</td>
-                      <td className="px-4 py-3 text-gray-500">{o.cpf ?? '—'}</td>
-                      <td className="px-4 py-3 text-right text-emerald-400 font-medium">{fmt(o.value)}</td>
-                      <td className="px-4 py-3 text-gray-400">
+                    <tr key={o.id} className="border-b border-black/[0.06] last:border-0 hover:bg-[#F8F7FC]">
+                      <td className="px-4 py-3 font-bold text-[#1A1A2E]">{o.guestName}</td>
+                      <td className="px-4 py-3 text-[#6B7280]">{o.cpf ?? '—'}</td>
+                      <td className="px-4 py-3 text-right text-[#4CD080] font-bold">{fmt(o.value)}</td>
+                      <td className="px-4 py-3 text-[#6B7280]">
                         {o.isEntrada ? 'Entrada + negociar' : o.installments ? `${o.installments}x` : 'À vista'}
                       </td>
-                      <td className="px-4 py-3 text-right text-gray-500">{fmtDate(o.createdAt)}</td>
+                      <td className="px-4 py-3 text-right text-[#9CA3AF]">{fmtDate(o.createdAt)}</td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center gap-2 justify-end">
-                          <button onClick={() => openEditOffer(o)} className="text-xs text-blue-400 hover:text-blue-300">✎</button>
+                          <button onClick={() => openEditOffer(o)} className="text-xs text-[#7C5CBF] hover:text-[#9B7DD4]">✎</button>
                           <button onClick={() => { if (confirm('Remover esta venda?')) deleteOfferSale.mutate(o.id) }}
-                            className="text-xs text-red-500 hover:text-red-400">✕</button>
+                            className="text-xs text-red-400 hover:text-red-500">✕</button>
                         </div>
                       </td>
                     </tr>
@@ -382,41 +385,41 @@ export default function TicketSalesPage() {
 
       {/* ─── Ticket Sale Modal ────────────────────────────────────────────────────── */}
       {showTicketModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
-            <h3 className="font-bold text-white mb-4">Registrar Venda de Convite</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 w-full max-w-md mx-4">
+            <h3 className="font-bold text-[#1A1A2E] mb-4">Registrar Venda de Convite</h3>
 
             {ticketTypes.length === 0 && (
-              <p className="text-sm text-amber-400 bg-amber-900/20 border border-amber-700 rounded-lg p-3 mb-4">
+              <p className="text-sm text-[#92610A] bg-[#FEF3CD] border border-[#F4C542]/30 rounded-[10px] p-3 mb-4">
                 Nenhum tipo de convite cadastrado. Vá em Configurações do evento ou adicione um tipo primeiro.
               </p>
             )}
 
             <div className="flex flex-col gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Convidado da lista</label>
+                <label className={lbl}>Convidado da lista</label>
                 <select value={ticketForm.guestId}
                   onChange={e => {
                     const g = guests.find(g => g.id === e.target.value)
                     setTicketForm(f => ({ ...f, guestId: e.target.value, guestName: g?.name ?? f.guestName }))
                   }}
-                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  className={inp}>
                   <option value="">— Buscar na lista (opcional) —</option>
                   {guests.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Nome do comprador *</label>
+                <label className={lbl}>Nome do comprador *</label>
                 <input value={ticketForm.guestName}
                   onChange={e => setTicketForm(f => ({ ...f, guestName: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={inp}
                   placeholder="Nome completo" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Tipo de convite *</label>
+                <label className={lbl}>Tipo de convite *</label>
                 <select value={ticketForm.ticketTypeId}
                   onChange={e => setTicketForm(f => ({ ...f, ticketTypeId: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  className={inp}>
                   <option value="">— Selecionar —</option>
                   {ticketTypes.map(t => (
                     <option key={t.id} value={t.id}>
@@ -427,33 +430,33 @@ export default function TicketSalesPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1">Quantidade</label>
+                  <label className={lbl}>Quantidade</label>
                   <input type="number" min={1} value={ticketForm.quantity}
                     onChange={e => setTicketForm(f => ({ ...f, quantity: parseInt(e.target.value) || 1 }))}
-                    className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className={inp} />
                 </div>
                 <div className="flex items-end pb-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-[#1A1A2E]">
                     <input type="checkbox" checked={ticketForm.overrideCourtesy}
                       onChange={e => setTicketForm(f => ({ ...f, overrideCourtesy: e.target.checked }))}
-                      className="w-4 h-4 accent-purple-500" />
+                      className="w-4 h-4 accent-[#7C5CBF]" />
                     Cortesia
                   </label>
                 </div>
               </div>
               {selectedTicketType && (
-                <p className="text-sm text-gray-400 bg-gray-800 rounded-lg px-3 py-2">
-                  Total: <span className="text-emerald-400 font-semibold">{fmt(unitPrice * ticketForm.quantity)}</span>
+                <p className="text-sm text-[#6B7280] bg-[#F8F7FC] rounded-[10px] px-3 py-2">
+                  Total: <span className="text-[#4CD080] font-bold">{fmt(unitPrice * ticketForm.quantity)}</span>
                 </p>
               )}
             </div>
 
             <div className="flex gap-2 mt-4">
               <button onClick={() => setShowTicketModal(false)}
-                className="flex-1 border border-gray-600 rounded-lg py-2 text-sm text-gray-400 hover:bg-gray-800">Cancelar</button>
+                className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
               <button onClick={submitTicketSale}
                 disabled={!ticketForm.ticketTypeId || !ticketForm.guestName.trim() || addTicketSale.isPending}
-                className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50">
+                className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold hover:bg-[#9B7DD4] transition-colors disabled:opacity-50">
                 {addTicketSale.isPending ? 'Salvando...' : 'Registrar'}
               </button>
             </div>
@@ -463,103 +466,103 @@ export default function TicketSalesPage() {
 
       {/* ─── Offer Sale Modal ─────────────────────────────────────────────────────── */}
       {showOfferModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 overflow-y-auto py-8">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl p-6 w-full max-w-lg mx-4">
-            <h3 className="font-bold text-white mb-4">{editingOffer ? 'Editar Venda de Oferta' : 'Registrar Venda de Oferta'}</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
+          <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 w-full max-w-lg mx-4">
+            <h3 className="font-bold text-[#1A1A2E] mb-4">{editingOffer ? 'Editar Venda de Oferta' : 'Registrar Venda de Oferta'}</h3>
 
             <div className="flex flex-col gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Convidado da lista</label>
+                <label className={lbl}>Convidado da lista</label>
                 <select value={offerForm.guestId}
                   onChange={e => {
                     const g = guests.find(g => g.id === e.target.value)
                     setOfferForm(f => ({ ...f, guestId: e.target.value, guestName: g?.name ?? f.guestName }))
                   }}
-                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  className={inp}>
                   <option value="">— Buscar na lista (opcional) —</option>
                   {guests.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Nome completo *</label>
+                <label className={lbl}>Nome completo *</label>
                 <input value={offerForm.guestName}
                   onChange={e => setOfferForm(f => ({ ...f, guestName: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className={inp} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1">CPF</label>
+                  <label className={lbl}>CPF</label>
                   <input value={offerForm.cpf}
                     onChange={e => setOfferForm(f => ({ ...f, cpf: e.target.value }))}
                     placeholder="000.000.000-00"
-                    className="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className={inp} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1">RG</label>
+                  <label className={lbl}>RG</label>
                   <input value={offerForm.rg}
                     onChange={e => setOfferForm(f => ({ ...f, rg: e.target.value }))}
-                    className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className={inp} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Endereço completo</label>
+                <label className={lbl}>Endereço completo</label>
                 <input value={offerForm.address}
                   onChange={e => setOfferForm(f => ({ ...f, address: e.target.value }))}
                   placeholder="Rua, número, cidade, estado"
-                  className="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className={inp} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Valor do investimento (R$) *</label>
+                <label className={lbl}>Valor do investimento (R$) *</label>
                 <input type="number" min="0" step="0.01" value={offerForm.value}
                   onChange={e => setOfferForm(f => ({ ...f, value: e.target.value }))}
                   placeholder="0,00"
-                  className="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className={inp} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-2">Forma de pagamento</label>
+                <label className={`${lbl} mb-2`}>Forma de pagamento</label>
                 <div className="flex flex-col gap-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-[#1A1A2E]">
                     <input type="radio" checked={!offerForm.isEntrada && !offerForm.installments}
                       onChange={() => setOfferForm(f => ({ ...f, isEntrada: false, installments: '' }))}
-                      className="accent-blue-500" />
+                      className="accent-[#7C5CBF]" />
                     À vista
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-[#1A1A2E]">
                     <input type="radio" checked={!offerForm.isEntrada && !!offerForm.installments}
                       onChange={() => setOfferForm(f => ({ ...f, isEntrada: false, installments: '2' }))}
-                      className="accent-blue-500" />
+                      className="accent-[#7C5CBF]" />
                     Parcelado
                     {!offerForm.isEntrada && !!offerForm.installments && (
                       <input type="number" min={2} max={24} value={offerForm.installments}
                         onChange={e => setOfferForm(f => ({ ...f, installments: e.target.value }))}
-                        className="w-16 bg-gray-800 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm"
+                        className="w-16 bg-white border border-black/[0.08] text-[#1A1A2E] rounded-[8px] px-2 py-1 text-sm focus:outline-none focus:border-[#7C5CBF]"
                         placeholder="N" />
                     )}
-                    {!offerForm.isEntrada && !!offerForm.installments && <span className="text-gray-500">parcelas</span>}
+                    {!offerForm.isEntrada && !!offerForm.installments && <span className="text-[#9CA3AF]">parcelas</span>}
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-[#1A1A2E]">
                     <input type="radio" checked={offerForm.isEntrada}
                       onChange={() => setOfferForm(f => ({ ...f, isEntrada: true, installments: '' }))}
-                      className="accent-blue-500" />
+                      className="accent-[#7C5CBF]" />
                     Entrada + negociar com equipe
                   </label>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Observações</label>
+                <label className={lbl}>Observações</label>
                 <textarea value={offerForm.notes}
                   onChange={e => setOfferForm(f => ({ ...f, notes: e.target.value }))}
                   rows={2}
-                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+                  className={`${inp} resize-none`} />
               </div>
             </div>
 
             <div className="flex gap-2 mt-4">
               <button onClick={() => setShowOfferModal(false)}
-                className="flex-1 border border-gray-600 rounded-lg py-2 text-sm text-gray-400 hover:bg-gray-800">Cancelar</button>
+                className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
               <button onClick={submitOffer}
                 disabled={!offerForm.guestName.trim() || !offerForm.value || addOfferSale.isPending || updateOfferSale.isPending}
-                className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50">
+                className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold hover:bg-[#9B7DD4] transition-colors disabled:opacity-50">
                 {(addOfferSale.isPending || updateOfferSale.isPending) ? 'Salvando...' : editingOffer ? 'Salvar alterações' : 'Registrar'}
               </button>
             </div>

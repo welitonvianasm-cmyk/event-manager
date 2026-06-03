@@ -5,38 +5,18 @@ import api from '../api/client'
 
 type Status = 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDO'
 
-interface Person {
-  id: string
-  name: string
-  role?: string
-}
-
+interface Person { id: string; name: string; role?: string }
 interface ChecklistItem {
-  id: string
-  title: string
-  status: Status
-  assignee?: string | null
-  personId?: string | null
-  dueDate?: string | null
-  notes?: string | null
-  person?: Person | null
+  id: string; title: string; status: Status; assignee?: string | null
+  personId?: string | null; dueDate?: string | null; notes?: string | null; person?: Person | null
 }
+interface Section { id: string; name: string; items: ChecklistItem[] }
 
-interface Section {
-  id: string
-  name: string
-  items: ChecklistItem[]
-}
-
-const statusIcon: Record<Status, string> = {
-  PENDENTE: '○',
-  EM_ANDAMENTO: '◑',
-  CONCLUIDO: '●',
-}
+const statusIcon: Record<Status, string> = { PENDENTE: '○', EM_ANDAMENTO: '◑', CONCLUIDO: '●' }
 const statusColor: Record<Status, string> = {
-  PENDENTE: 'text-gray-500',
-  EM_ANDAMENTO: 'text-yellow-400',
-  CONCLUIDO: 'text-emerald-400',
+  PENDENTE: 'text-[#9CA3AF]',
+  EM_ANDAMENTO: 'text-[#F4C542]',
+  CONCLUIDO: 'text-[#4CD080]',
 }
 
 function nextStatus(s: Status): Status {
@@ -44,12 +24,9 @@ function nextStatus(s: Status): Status {
   if (s === 'EM_ANDAMENTO') return 'CONCLUIDO'
   return 'PENDENTE'
 }
-
 function formatDate(iso: string) {
-  const d = new Date(iso)
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
+  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
 }
-
 function isOverdue(iso: string) {
   return new Date(iso) < new Date(new Date().toDateString())
 }
@@ -57,7 +34,6 @@ function isOverdue(iso: string) {
 export default function ChecklistPage() {
   const { id } = useParams()
   const qc = useQueryClient()
-
   const [addingSectionName, setAddingSectionName] = useState('')
   const [showAddSection, setShowAddSection] = useState(false)
   const [addingItem, setAddingItem] = useState<Record<string, string>>({})
@@ -67,7 +43,6 @@ export default function ChecklistPage() {
     queryKey: ['checklist', id],
     queryFn: () => api.get(`/events/${id}/checklist`).then(r => r.data),
   })
-
   const { data: people } = useQuery<Person[]>({
     queryKey: ['people', id],
     queryFn: () => api.get(`/events/${id}/people`).then(r => r.data),
@@ -80,29 +55,25 @@ export default function ChecklistPage() {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist', id] }),
   })
-
   const deleteItem = useMutation({
     mutationFn: (itemId: string) => api.delete(`/events/${id}/checklist/${itemId}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist', id] }),
   })
-
   const addItem = useMutation({
     mutationFn: ({ sectionId, title }: { sectionId: string; title: string }) =>
       api.post(`/events/${id}/checklist/sections/${sectionId}/items`, { title }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist', id] }),
   })
-
   const addSection = useMutation({
     mutationFn: (name: string) => api.post(`/events/${id}/checklist/sections`, { name }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist', id] }),
   })
-
   const deleteSection = useMutation({
     mutationFn: (sectionId: string) => api.delete(`/events/${id}/checklist/sections/${sectionId}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist', id] }),
   })
 
-  if (isLoading) return <p className="text-sm text-gray-500">Carregando...</p>
+  if (isLoading) return <p className="text-sm text-[#9CA3AF]">Carregando...</p>
 
   const allItems = sections?.flatMap(s => s.items) ?? []
   const done = allItems.filter(i => i.status === 'CONCLUIDO').length
@@ -111,35 +82,25 @@ export default function ChecklistPage() {
   function handleAddSection() {
     const name = addingSectionName.trim()
     if (!name) return
-    addSection.mutate(name, {
-      onSuccess: () => {
-        setAddingSectionName('')
-        setShowAddSection(false)
-      },
-    })
+    addSection.mutate(name, { onSuccess: () => { setAddingSectionName(''); setShowAddSection(false) } })
   }
-
   function handleAddItem(sectionId: string) {
     const title = (addingItem[sectionId] ?? '').trim()
     if (!title) return
-    addItem.mutate({ sectionId, title }, {
-      onSuccess: () => setAddingItem(prev => ({ ...prev, [sectionId]: '' })),
-    })
+    addItem.mutate({ sectionId, title }, { onSuccess: () => setAddingItem(prev => ({ ...prev, [sectionId]: '' })) })
   }
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-2 text-sm text-gray-500">
-        <Link to={`/events/${id}`} className="hover:text-gray-300">← Voltar ao evento</Link>
+      <div className="flex items-center gap-2 mb-2 text-sm text-[#9CA3AF]">
+        <Link to={`/events/${id}`} className="hover:text-[#7C5CBF] transition-colors">← Voltar ao evento</Link>
       </div>
-
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-2xl font-bold text-white">Checklist</h1>
-        <span className="text-sm text-gray-500">{done}/{allItems.length} concluídos ({progress}%)</span>
+        <h1 className="text-[22px] font-bold text-[#1A1A2E]">Checklist</h1>
+        <span className="text-sm text-[#9CA3AF]">{done}/{allItems.length} concluídos ({progress}%)</span>
       </div>
-
-      <div className="h-2 bg-gray-700 rounded-full overflow-hidden mb-8">
-        <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
+      <div className="h-2 bg-[#EDE9F8] rounded-full overflow-hidden mb-8">
+        <div className="h-full bg-[#7C5CBF] rounded-full transition-all" style={{ width: `${progress}%` }} />
       </div>
 
       <div className="flex flex-col gap-6">
@@ -147,109 +108,69 @@ export default function ChecklistPage() {
           const secDone = section.items.filter(i => i.status === 'CONCLUIDO').length
           const secPct = section.items.length ? Math.round((secDone / section.items.length) * 100) : 0
           const sectionAddingTitle = addingItem[section.id] ?? ''
-
           return (
-            <div key={section.id} className="bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-700 flex items-center justify-between">
-                <h2 className="font-semibold text-gray-200">{section.name}</h2>
+            <div key={section.id} className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] overflow-hidden">
+              <div className="px-5 py-4 border-b border-black/[0.08] bg-[#F8F7FC] flex items-center justify-between">
+                <h2 className="font-bold text-[#1A1A2E]">{section.name}</h2>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500">{secDone}/{section.items.length}</span>
-                  <div className="w-20 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${secPct}%` }} />
+                  <span className="text-xs text-[#9CA3AF]">{secDone}/{section.items.length}</span>
+                  <div className="w-20 h-1.5 bg-[#EDE9F8] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#7C5CBF] rounded-full transition-all" style={{ width: `${secPct}%` }} />
                   </div>
                   <button
-                    onClick={() => {
-                      if (!confirm(`Excluir seção "${section.name}" e todas as suas tarefas?`)) return
-                      deleteSection.mutate(section.id)
-                    }}
-                    className="text-xs text-red-500 hover:text-red-400 transition-colors ml-1"
-                    title="Excluir seção"
-                  >
-                    ✕
-                  </button>
+                    onClick={() => { if (!confirm(`Excluir seção "${section.name}" e todas as suas tarefas?`)) return; deleteSection.mutate(section.id) }}
+                    className="text-xs text-red-400 hover:text-red-500 transition-colors ml-1" title="Excluir seção">✕</button>
                 </div>
               </div>
-
-              <div className="divide-y divide-gray-800">
+              <div className="divide-y divide-black/[0.06]">
                 {section.items.map(item => (
-                  <ItemRow
-                    key={item.id}
-                    item={item}
-                    people={people ?? []}
+                  <ItemRow key={item.id} item={item} people={people ?? []}
                     isEditing={editingItem === item.id}
                     onToggleEdit={() => setEditingItem(prev => prev === item.id ? null : item.id)}
                     onCycleStatus={() => updateItem.mutate({ itemId: item.id, status: nextStatus(item.status) })}
                     onUpdateDate={(date) => updateItem.mutate({ itemId: item.id, dueDate: date || null })}
                     onUpdatePerson={(personId) => updateItem.mutate({ itemId: item.id, personId: personId || null })}
                     onUpdateNotes={(notes) => updateItem.mutate({ itemId: item.id, notes: notes || null })}
-                    onDelete={() => {
-                      if (!confirm(`Excluir tarefa "${item.title}"?`)) return
-                      deleteItem.mutate(item.id)
-                    }}
+                    onDelete={() => { if (!confirm(`Excluir tarefa "${item.title}"?`)) return; deleteItem.mutate(item.id) }}
                   />
                 ))}
               </div>
-
-              <div className="px-5 py-3 border-t border-gray-800 flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="+ Nova tarefa..."
+              <div className="px-5 py-3 border-t border-black/[0.06] flex items-center gap-2 bg-[#FAFAFA]">
+                <input type="text" placeholder="+ Nova tarefa..."
                   value={sectionAddingTitle}
                   onChange={e => setAddingItem(prev => ({ ...prev, [section.id]: e.target.value }))}
                   onKeyDown={e => {
                     if (e.key === 'Enter') handleAddItem(section.id)
                     if (e.key === 'Escape') setAddingItem(prev => ({ ...prev, [section.id]: '' }))
                   }}
-                  className="flex-1 text-sm bg-transparent outline-none text-gray-400 placeholder-gray-600"
-                />
+                  className="flex-1 text-sm bg-transparent outline-none text-[#6B7280] placeholder-[#C4B5FD]" />
                 {sectionAddingTitle && (
-                  <button
-                    onClick={() => handleAddItem(section.id)}
-                    className="text-xs bg-emerald-600 text-white px-2 py-1 rounded-lg hover:bg-emerald-700"
-                  >
-                    Adicionar
-                  </button>
+                  <button onClick={() => handleAddItem(section.id)}
+                    className="text-xs bg-[#4CD080] text-white px-3 py-1 rounded-full hover:opacity-90 font-bold">Adicionar</button>
                 )}
               </div>
             </div>
           )
         })}
-
-        <div className="border-2 border-dashed border-gray-700 rounded-2xl">
+        <div className="border-2 border-dashed border-[#D1C4E9] rounded-[14px]">
           {showAddSection ? (
             <div className="px-5 py-4 flex items-center gap-3">
-              <input
-                autoFocus
-                type="text"
-                placeholder="Nome da seção..."
+              <input autoFocus type="text" placeholder="Nome da seção..."
                 value={addingSectionName}
                 onChange={e => setAddingSectionName(e.target.value)}
                 onKeyDown={e => {
                   if (e.key === 'Enter') handleAddSection()
                   if (e.key === 'Escape') { setShowAddSection(false); setAddingSectionName('') }
                 }}
-                className="flex-1 text-sm outline-none bg-transparent text-gray-200 placeholder-gray-600"
-              />
-              <button
-                onClick={handleAddSection}
-                className="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700"
-              >
-                Criar
-              </button>
-              <button
-                onClick={() => { setShowAddSection(false); setAddingSectionName('') }}
-                className="text-sm text-gray-500 hover:text-gray-300"
-              >
-                Cancelar
-              </button>
+                className="flex-1 text-sm outline-none bg-transparent text-[#1A1A2E] placeholder-[#9CA3AF]" />
+              <button onClick={handleAddSection}
+                className="text-sm bg-[#7C5CBF] text-white px-4 py-1.5 rounded-full font-bold hover:bg-[#9B7DD4] transition-colors">Criar</button>
+              <button onClick={() => { setShowAddSection(false); setAddingSectionName('') }}
+                className="text-sm text-[#9CA3AF] hover:text-[#6B7280]">Cancelar</button>
             </div>
           ) : (
-            <button
-              onClick={() => setShowAddSection(true)}
-              className="w-full px-5 py-4 text-sm text-gray-600 hover:text-gray-400 text-left"
-            >
-              + Nova seção
-            </button>
+            <button onClick={() => setShowAddSection(true)}
+              className="w-full px-5 py-4 text-sm text-[#9CA3AF] hover:text-[#7C5CBF] text-left transition-colors">+ Nova seção</button>
           )}
         </div>
       </div>
@@ -258,15 +179,9 @@ export default function ChecklistPage() {
 }
 
 interface ItemRowProps {
-  item: ChecklistItem
-  people: Person[]
-  isEditing: boolean
-  onToggleEdit: () => void
-  onCycleStatus: () => void
-  onUpdateDate: (date: string) => void
-  onUpdatePerson: (personId: string) => void
-  onUpdateNotes: (notes: string) => void
-  onDelete: () => void
+  item: ChecklistItem; people: Person[]; isEditing: boolean
+  onToggleEdit: () => void; onCycleStatus: () => void; onUpdateDate: (date: string) => void
+  onUpdatePerson: (personId: string) => void; onUpdateNotes: (notes: string) => void; onDelete: () => void
 }
 
 function ItemRow({ item, people, isEditing, onToggleEdit, onCycleStatus, onUpdateDate, onUpdatePerson, onUpdateNotes, onDelete }: ItemRowProps) {
@@ -275,100 +190,64 @@ function ItemRow({ item, people, isEditing, onToggleEdit, onCycleStatus, onUpdat
   const overdue = item.dueDate && item.status !== 'CONCLUIDO' && isOverdue(item.dueDate)
 
   return (
-    <div className="px-5 py-3 hover:bg-gray-800 group">
+    <div className="px-5 py-3 hover:bg-[#FAFAFA] group transition-colors">
       <div className="flex items-center gap-3">
-        <button
-          onClick={onCycleStatus}
-          className={`text-xl flex-shrink-0 ${statusColor[item.status]} hover:scale-110 transition-transform`}
-          title={item.status}
-        >
+        <button onClick={onCycleStatus}
+          className={`text-xl flex-shrink-0 ${statusColor[item.status]} hover:scale-110 transition-transform`} title={item.status}>
           {statusIcon[item.status]}
         </button>
-
         <div className="flex-1 min-w-0">
-          <span
-            className={`text-sm ${item.status === 'CONCLUIDO' ? 'line-through text-gray-600' : 'text-gray-300'}`}
-          >
-            {item.title}
-          </span>
+          <span className={`text-sm ${item.status === 'CONCLUIDO' ? 'line-through text-[#9CA3AF]' : 'text-[#1A1A2E]'}`}>{item.title}</span>
           {item.notes && !isEditing && (
-            <p className="text-xs text-gray-500 mt-0.5 italic truncate">{item.notes}</p>
+            <p className="text-xs text-[#9CA3AF] mt-0.5 italic truncate">{item.notes}</p>
           )}
         </div>
-
         {!isEditing && (
           <div className="flex items-center gap-2">
             {personName && (
-              <span className="text-xs bg-indigo-900/40 text-indigo-400 px-2 py-0.5 rounded-full">{personName}</span>
+              <span className="text-xs bg-[#EDE9F8] text-[#7C5CBF] px-2 py-0.5 rounded-full font-bold">{personName}</span>
             )}
             {dateStr && (
-              <span className={`text-xs px-2 py-0.5 rounded-full ${overdue ? 'bg-red-900/30 text-red-400' : 'bg-gray-700 text-gray-400'}`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${overdue ? 'bg-[#FDEDEE] text-[#C0392B]' : 'bg-[#F3F2F8] text-[#6B7280]'}`}>
                 {formatDate(item.dueDate!)}
               </span>
             )}
-            <button
-              onClick={onToggleEdit}
-              className="text-xs text-gray-700 group-hover:text-gray-500 transition-colors"
-              title="Editar detalhes"
-            >
-              ✎
-            </button>
-            <button
-              onClick={onDelete}
-              className="text-xs text-gray-700 group-hover:text-red-500 transition-colors"
-              title="Excluir tarefa"
-            >
-              ✕
-            </button>
+            <button onClick={onToggleEdit} className="text-xs text-[#C4B5FD] group-hover:text-[#7C5CBF] transition-colors" title="Editar">✎</button>
+            <button onClick={onDelete} className="text-xs text-[#C4B5FD] group-hover:text-red-400 transition-colors" title="Excluir">✕</button>
           </div>
         )}
-
         {isEditing && (
           <div className="flex items-center gap-2">
-            <button onClick={onToggleEdit} className="text-xs text-gray-500 hover:text-gray-300">▲</button>
-            <button onClick={onDelete} className="text-xs text-red-500 hover:text-red-400" title="Excluir">✕</button>
+            <button onClick={onToggleEdit} className="text-xs text-[#9CA3AF] hover:text-[#6B7280]">▲</button>
+            <button onClick={onDelete} className="text-xs text-red-400 hover:text-red-500" title="Excluir">✕</button>
           </div>
         )}
       </div>
-
       {isEditing && (
         <div className="mt-2 ml-8 flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-gray-500">Prazo:</span>
-            <input
-              type="date"
-              defaultValue={dateStr}
-              onChange={e => onUpdateDate(e.target.value)}
-              className="text-xs bg-gray-800 border border-gray-600 text-gray-300 rounded-lg px-2 py-1 outline-none focus:border-indigo-500"
-            />
+            <span className="text-xs text-[#9CA3AF]">Prazo:</span>
+            <input type="date" defaultValue={dateStr} onChange={e => onUpdateDate(e.target.value)}
+              className="text-xs bg-white border border-black/[0.08] text-[#1A1A2E] rounded-[8px] px-2 py-1 outline-none focus:border-[#7C5CBF]" />
             {dateStr && (
-              <button onClick={() => onUpdateDate('')} className="text-xs text-gray-600 hover:text-red-400" title="Remover data">✕</button>
+              <button onClick={() => onUpdateDate('')} className="text-xs text-[#9CA3AF] hover:text-red-400" title="Remover data">✕</button>
             )}
           </div>
-
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-gray-500">Responsável:</span>
-            <select
-              defaultValue={item.personId ?? ''}
-              onChange={e => onUpdatePerson(e.target.value)}
-              className="text-xs bg-gray-800 border border-gray-600 text-gray-300 rounded-lg px-2 py-1 outline-none focus:border-indigo-500"
-            >
+            <span className="text-xs text-[#9CA3AF]">Responsável:</span>
+            <select defaultValue={item.personId ?? ''} onChange={e => onUpdatePerson(e.target.value)}
+              className="text-xs bg-white border border-black/[0.08] text-[#1A1A2E] rounded-[8px] px-2 py-1 outline-none focus:border-[#7C5CBF]">
               <option value="">Nenhum</option>
               {people.map(p => (
                 <option key={p.id} value={p.id}>{p.name}{p.role ? ` (${p.role})` : ''}</option>
               ))}
             </select>
           </div>
-
           <div className="w-full mt-1">
-            <span className="text-xs text-gray-500 block mb-1">Observação:</span>
-            <textarea
-              defaultValue={item.notes ?? ''}
-              onBlur={e => onUpdateNotes(e.target.value)}
-              rows={2}
+            <span className="text-xs text-[#9CA3AF] block mb-1">Observação:</span>
+            <textarea defaultValue={item.notes ?? ''} onBlur={e => onUpdateNotes(e.target.value)} rows={2}
               placeholder="Adicione uma observação..."
-              className="w-full text-xs bg-gray-800 border border-gray-600 text-gray-300 placeholder-gray-600 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-500 resize-none"
-            />
+              className="w-full text-xs bg-white border border-black/[0.08] text-[#1A1A2E] placeholder-[#9CA3AF] rounded-[8px] px-2 py-1.5 outline-none focus:border-[#7C5CBF] resize-none" />
           </div>
         </div>
       )}

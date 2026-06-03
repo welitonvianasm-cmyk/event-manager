@@ -5,6 +5,9 @@ import api from '../api/client'
 
 type TicketFilter = 'all' | 'paid' | 'courtesy' | 'Normal' | 'VIP' | 'Premium'
 
+const inp = 'w-full bg-white border border-black/[0.08] text-[#1A1A2E] placeholder-[#9CA3AF] rounded-[10px] px-3 py-2 text-sm focus:outline-none focus:border-[#7C5CBF] focus:ring-2 focus:ring-[#EDE9F8]'
+const lbl = 'block text-xs font-bold text-[#6B7280] mb-1'
+
 export default function GuestListPage() {
   const { id } = useParams()
   const qc = useQueryClient()
@@ -131,7 +134,7 @@ export default function GuestListPage() {
   const confirmed = guests.filter((g: any) => g.confirmed).length
   const checkedIn = guests.filter((g: any) => g.checkedIn).length
 
-  if (isLoading) return <p className="text-sm text-gray-500">Carregando...</p>
+  if (isLoading) return <p className="text-sm text-[#9CA3AF]">Carregando...</p>
 
   const filterChips: { value: TicketFilter; label: string }[] = [
     { value: 'all', label: 'Todos' },
@@ -145,35 +148,35 @@ export default function GuestListPage() {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 mb-6 text-sm text-gray-500">
-        <Link to="/" className="hover:text-gray-300">Eventos</Link>
+      <div className="flex items-center gap-2 mb-6 text-sm text-[#9CA3AF]">
+        <Link to="/" className="hover:text-[#7C5CBF] transition-colors">Eventos</Link>
         <span>/</span>
-        <Link to={`/events/${id}`} className="hover:text-gray-300">{event?.name ?? '...'}</Link>
+        <Link to={`/events/${id}`} className="hover:text-[#7C5CBF] transition-colors">{event?.name ?? '...'}</Link>
         <span>/</span>
-        <span className="text-gray-200 font-medium">Lista de Convidados</span>
+        <span className="text-[#1A1A2E] font-bold">Lista de Convidados</span>
       </div>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Lista de Convidados</h1>
+          <h1 className="text-[22px] font-bold text-[#1A1A2E]">Lista de Convidados</h1>
           {event?.participants && (
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-[#6B7280] mt-0.5">
               {total} de {event.participants} convidados previstos
             </p>
           )}
         </div>
         <div className="flex gap-2 flex-wrap">
           <button onClick={() => setShowImport(true)}
-            className="text-sm border border-gray-600 rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-800 flex items-center gap-1.5">
+            className="text-sm border border-black/[0.15] rounded-full px-4 py-2 text-[#6B7280] hover:bg-[#F3F2F8] transition-colors flex items-center gap-1.5">
             📥 Importar Google Sheets
           </button>
           <button onClick={downloadCSV}
-            className="text-sm border border-gray-600 rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-800 flex items-center gap-1.5">
+            className="text-sm border border-black/[0.15] rounded-full px-4 py-2 text-[#6B7280] hover:bg-[#F3F2F8] transition-colors flex items-center gap-1.5">
             📤 Exportar CSV
           </button>
           <button onClick={() => setShowAddForm(true)}
-            className="text-sm bg-blue-600 text-white rounded-lg px-4 py-2 font-medium hover:bg-blue-700">
+            className="text-sm bg-[#7C5CBF] text-white rounded-full px-5 py-2 font-bold hover:bg-[#9B7DD4] transition-colors">
             + Adicionar Convidado
           </button>
         </div>
@@ -181,48 +184,47 @@ export default function GuestListPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-white">{total}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Total</p>
+        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
+          <p className="text-2xl font-bold text-[#1A1A2E]">{total}</p>
+          <p className="text-xs text-[#9CA3AF] mt-0.5">Total</p>
         </div>
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-emerald-400">{confirmed}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Confirmados</p>
+        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
+          <p className="text-2xl font-bold text-[#4CD080]">{confirmed}</p>
+          <p className="text-xs text-[#9CA3AF] mt-0.5">Confirmados</p>
         </div>
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-blue-400">{checkedIn}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Credenciados</p>
+        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
+          <p className="text-2xl font-bold text-[#7C5CBF]">{checkedIn}</p>
+          <p className="text-xs text-[#9CA3AF] mt-0.5">Credenciados</p>
         </div>
       </div>
 
       {/* Add form modal */}
       {showAddForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
-            <h3 className="font-bold text-white mb-4">Adicionar Convidado</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 w-full max-w-md mx-4">
+            <h3 className="font-bold text-[#1A1A2E] mb-4">Adicionar Convidado</h3>
             <div className="flex flex-col gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Nome *</label>
+                <label className={lbl}>Nome *</label>
                 <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoFocus />
+                  className={inp} autoFocus />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Telefone</label>
+                <label className={lbl}>Telefone</label>
                 <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className={inp} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">E-mail</label>
+                <label className={lbl}>E-mail</label>
                 <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className={inp} />
               </div>
             </div>
             <div className="flex gap-2 mt-4">
               <button onClick={() => { setShowAddForm(false); setForm({ name: '', phone: '', email: '' }) }}
-                className="flex-1 border border-gray-600 rounded-lg py-2 text-sm text-gray-400 hover:bg-gray-800">Cancelar</button>
+                className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
               <button onClick={() => addGuest.mutate(form)} disabled={!form.name.trim() || addGuest.isPending}
-                className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50">
+                className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold hover:bg-[#9B7DD4] transition-colors disabled:opacity-50">
                 {addGuest.isPending ? 'Salvando...' : 'Salvar'}
               </button>
             </div>
@@ -232,17 +234,17 @@ export default function GuestListPage() {
 
       {/* Vincular convite modal */}
       {linkingGuest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
-            <h3 className="font-bold text-white mb-1">Vincular Convite</h3>
-            <p className="text-xs text-gray-500 mb-4">{linkingGuest.name}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 w-full max-w-md mx-4">
+            <h3 className="font-bold text-[#1A1A2E] mb-1">Vincular Convite</h3>
+            <p className="text-xs text-[#9CA3AF] mb-4">{linkingGuest.name}</p>
             <div className="flex flex-col gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Tipo de Convite *</label>
+                <label className={lbl}>Tipo de Convite *</label>
                 <select
                   value={linkTicketTypeId}
                   onChange={e => setLinkTicketTypeId(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  className={inp}>
                   <option value="">Selecione...</option>
                   {ticketTypes.map((tt: any) => (
                     <option key={tt.id} value={tt.id}>
@@ -253,13 +255,13 @@ export default function GuestListPage() {
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={linkIsCourtesy} onChange={e => setLinkIsCourtesy(e.target.checked)}
-                  className="w-4 h-4 accent-purple-500" />
-                <span className="text-sm text-gray-300">Cortesia (valor zerado)</span>
+                  className="w-4 h-4 accent-[#7C5CBF]" />
+                <span className="text-sm text-[#1A1A2E]">Cortesia (valor zerado)</span>
               </label>
             </div>
             <div className="flex gap-2 mt-4">
               <button onClick={() => { setLinkingGuest(null); setLinkTicketTypeId(''); setLinkIsCourtesy(false) }}
-                className="flex-1 border border-gray-600 rounded-lg py-2 text-sm text-gray-400 hover:bg-gray-800">Cancelar</button>
+                className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
               <button
                 disabled={!linkTicketTypeId || linkTicketSale.isPending}
                 onClick={() => {
@@ -274,7 +276,7 @@ export default function GuestListPage() {
                     unitPrice,
                   })
                 }}
-                className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50">
+                className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold hover:bg-[#9B7DD4] transition-colors disabled:opacity-50">
                 {linkTicketSale.isPending ? 'Salvando...' : 'Vincular'}
               </button>
             </div>
@@ -284,25 +286,25 @@ export default function GuestListPage() {
 
       {/* Import modal */}
       {showImport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl p-6 w-full max-w-lg mx-4">
-            <h3 className="font-bold text-white mb-2">Importar do Google Sheets</h3>
-            <p className="text-xs text-gray-500 mb-4">
-              A planilha precisa ter colunas com os nomes: <strong className="text-gray-300">nome</strong>, <strong className="text-gray-300">telefone</strong>, <strong className="text-gray-300">email</strong>. Certifique-se de que ela está compartilhada como "qualquer pessoa com o link pode ver".
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 w-full max-w-lg mx-4">
+            <h3 className="font-bold text-[#1A1A2E] mb-2">Importar do Google Sheets</h3>
+            <p className="text-xs text-[#6B7280] mb-4">
+              A planilha precisa ter colunas com os nomes: <strong className="text-[#1A1A2E]">nome</strong>, <strong className="text-[#1A1A2E]">telefone</strong>, <strong className="text-[#1A1A2E]">email</strong>. Certifique-se de que ela está compartilhada como "qualquer pessoa com o link pode ver".
             </p>
-            <label className="block text-xs font-medium text-gray-400 mb-1">URL da planilha</label>
+            <label className={lbl}>URL da planilha</label>
             <input value={sheetUrl} onChange={e => setSheetUrl(e.target.value)}
               placeholder="https://docs.google.com/spreadsheets/d/..."
-              className="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-600 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`${inp} mb-3`}
               autoFocus />
             {importMsg && (
-              <p className={`text-sm mb-3 ${importMsg.includes('sucesso') ? 'text-emerald-400' : 'text-red-400'}`}>{importMsg}</p>
+              <p className={`text-sm mb-3 font-bold ${importMsg.includes('sucesso') ? 'text-[#4CD080]' : 'text-red-500'}`}>{importMsg}</p>
             )}
             <div className="flex gap-2">
               <button onClick={() => { setShowImport(false); setImportMsg(''); setSheetUrl('') }}
-                className="flex-1 border border-gray-600 rounded-lg py-2 text-sm text-gray-400 hover:bg-gray-800">Fechar</button>
+                className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Fechar</button>
               <button onClick={handleImport} disabled={!sheetUrl.trim() || importing}
-                className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50">
+                className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold hover:bg-[#9B7DD4] transition-colors disabled:opacity-50">
                 {importing ? 'Importando...' : 'Importar'}
               </button>
             </div>
@@ -315,15 +317,15 @@ export default function GuestListPage() {
         <input
           value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Buscar convidado pelo nome..."
-          className="w-full bg-gray-900 border border-gray-700 text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={inp}
         />
         <div className="flex gap-2 flex-wrap">
           {filterChips.map(chip => (
             <button key={chip.value} onClick={() => setTicketFilter(chip.value)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
                 ticketFilter === chip.value
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700 border border-gray-700'
+                  ? 'bg-[#7C5CBF] text-white'
+                  : 'bg-white text-[#6B7280] border border-black/[0.08] hover:border-[#7C5CBF] hover:text-[#7C5CBF]'
               }`}>
               {chip.label}
             </button>
@@ -333,27 +335,27 @@ export default function GuestListPage() {
 
       {/* Guest table */}
       {guests.length === 0 ? (
-        <div className="text-center py-16 text-gray-600">
+        <div className="text-center py-16 text-[#9CA3AF]">
           <p className="text-4xl mb-3">👥</p>
-          <p className="text-sm text-gray-500">Nenhum convidado ainda</p>
-          <p className="text-xs mt-1 text-gray-600">Adicione manualmente ou importe do Google Sheets</p>
+          <p className="text-sm">Nenhum convidado ainda</p>
+          <p className="text-xs mt-1 text-[#9CA3AF]">Adicione manualmente ou importe do Google Sheets</p>
         </div>
       ) : filteredGuests.length === 0 ? (
-        <div className="text-center py-10 text-gray-600">
-          <p className="text-sm text-gray-500">Nenhum convidado encontrado com este filtro</p>
+        <div className="text-center py-10 text-[#9CA3AF]">
+          <p className="text-sm">Nenhum convidado encontrado com este filtro</p>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden">
+        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-800 border-b border-gray-700">
+            <thead className="bg-[#F8F7FC] border-b border-black/[0.08]">
               <tr>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">#</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Nome</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Convite</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Telefone</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">E-mail</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Confirmado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Credenciado</th>
+                <th className="text-left px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">#</th>
+                <th className="text-left px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Nome</th>
+                <th className="text-left px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Convite</th>
+                <th className="text-left px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Telefone</th>
+                <th className="text-left px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">E-mail</th>
+                <th className="text-center px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Confirmado</th>
+                <th className="text-center px-4 py-3 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Credenciado</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -361,39 +363,39 @@ export default function GuestListPage() {
               {filteredGuests.map((g: any, idx: number) => {
                 const sale = saleByGuestId[g.id]
                 return (
-                  <tr key={g.id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/50">
-                    <td className="px-4 py-3 text-gray-600">{idx + 1}</td>
-                    <td className="px-4 py-3 font-medium text-white">{g.name}</td>
+                  <tr key={g.id} className="border-b border-black/[0.06] last:border-0 hover:bg-[#F8F7FC]">
+                    <td className="px-4 py-3 text-[#9CA3AF] text-xs">{idx + 1}</td>
+                    <td className="px-4 py-3 font-bold text-[#1A1A2E]">{g.name}</td>
                     <td className="px-4 py-3">
                       {sale ? (
                         sale.unitPrice === 0
-                          ? <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">Cortesia</span>
-                          : <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">{sale.ticketType?.name ?? 'Pagante'}</span>
+                          ? <span className="text-xs bg-[#EDE9F8] text-[#7C5CBF] px-2 py-0.5 rounded-full font-bold">Cortesia</span>
+                          : <span className="text-xs bg-[#D4EDDA] text-[#155724] px-2 py-0.5 rounded-full font-bold">{sale.ticketType?.name ?? 'Pagante'}</span>
                       ) : ticketTypes.length > 0 ? (
                         <button
                           onClick={() => { setLinkingGuest(g); setLinkTicketTypeId(''); setLinkIsCourtesy(false) }}
-                          className="text-xs text-blue-400 hover:text-blue-300 border border-blue-800/60 rounded-full px-2 py-0.5 hover:bg-blue-900/20">
+                          className="text-xs text-[#7C5CBF] hover:text-[#9B7DD4] border border-[#C4B5FD] rounded-full px-2 py-0.5 hover:bg-[#EDE9F8] transition-colors font-bold">
                           + Vincular
                         </button>
                       ) : (
-                        <span className="text-xs text-gray-600">—</span>
+                        <span className="text-xs text-[#9CA3AF]">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-500">{g.phone ?? '—'}</td>
-                    <td className="px-4 py-3 text-gray-500">{g.email ?? '—'}</td>
+                    <td className="px-4 py-3 text-[#6B7280]">{g.phone ?? '—'}</td>
+                    <td className="px-4 py-3 text-[#6B7280]">{g.email ?? '—'}</td>
                     <td className="px-4 py-3 text-center">
                       <input type="checkbox" checked={g.confirmed}
                         onChange={e => updateGuest.mutate({ gid: g.id, data: { confirmed: e.target.checked } })}
-                        className="w-4 h-4 accent-emerald-500 cursor-pointer" />
+                        className="w-4 h-4 accent-[#4CD080] cursor-pointer" />
                     </td>
                     <td className="px-4 py-3 text-center">
                       <input type="checkbox" checked={g.checkedIn}
                         onChange={e => updateGuest.mutate({ gid: g.id, data: { checkedIn: e.target.checked } })}
-                        className="w-4 h-4 accent-blue-500 cursor-pointer" />
+                        className="w-4 h-4 accent-[#7C5CBF] cursor-pointer" />
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button onClick={() => { if (confirm(`Remover ${g.name}?`)) deleteGuest.mutate(g.id) }}
-                        className="text-xs text-red-500 hover:text-red-400">✕</button>
+                        className="text-xs text-red-400 hover:text-red-500">✕</button>
                     </td>
                   </tr>
                 )

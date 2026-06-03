@@ -33,54 +33,58 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0b0f1a]">
-      <div className="bg-gray-900 rounded-2xl border border-gray-700 p-8 w-full max-w-sm">
-        <div className="flex items-center gap-2.5 mb-6">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+    <div className="min-h-screen flex items-center justify-center bg-[#F3F2F8]">
+      <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(124,92,191,0.10)] p-8 w-full max-w-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-[#7C5CBF] rounded-[10px] flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
+              <polyline points="4,26 13,16 20,22 30,10" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="26,10 34,10 34,18" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="font-bold text-white text-lg">EventManager</span>
+          <div>
+            <span className="font-bold text-[#1A1A2E] text-[15px] block leading-tight">EventManager</span>
+            <span className="text-[11px] text-[#9CA3AF]">Sistema de Gestão</span>
+          </div>
         </div>
-        <h1 className="text-xl font-bold text-white mb-1">Criar conta</h1>
-        <p className="text-gray-500 text-sm mb-6">Preencha seus dados para se cadastrar</p>
+        <h1 className="text-[22px] font-bold text-[#1A1A2E] mb-1">Criar conta</h1>
+        <p className="text-[#6B7280] text-sm mb-6">Preencha seus dados para se cadastrar</p>
         {error && (
-          <p className="text-red-400 text-sm mb-4 bg-red-900/30 border border-red-800 rounded-lg p-3">{error}</p>
+          <p className="text-sm mb-4 bg-[#FDEDEE] border border-[#FF6B8A]/30 text-[#C0392B] rounded-[10px] p-3">{error}</p>
         )}
         {success && (
-          <div className="mb-4 bg-emerald-900/30 border border-emerald-700 rounded-lg p-3">
-            <p className="text-sm text-emerald-400">{success}</p>
-            <p className="text-xs text-emerald-500 mt-1">
-              <Link to="/login" className="underline font-medium">Voltar ao login</Link>
+          <div className="mb-4 bg-[#D4EDDA] border border-[#4CD080]/30 rounded-[10px] p-3">
+            <p className="text-sm text-[#155724] font-bold">{success}</p>
+            <p className="text-xs text-[#155724] mt-1">
+              <Link to="/login" className="underline font-bold">Voltar ao login</Link>
             </p>
           </div>
         )}
         {!success && (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Nome</label>
+              <label className="block text-xs font-bold text-[#6B7280] mb-1">Nome</label>
               <input value={name} onChange={e => setName(e.target.value)} required
-                className="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full bg-white border border-black/[0.08] text-[#1A1A2E] placeholder-[#9CA3AF] rounded-[10px] px-3 py-2.5 text-sm focus:outline-none focus:border-[#7C5CBF] focus:ring-2 focus:ring-[#EDE9F8]" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">E-mail</label>
+              <label className="block text-xs font-bold text-[#6B7280] mb-1">E-mail</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                className="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full bg-white border border-black/[0.08] text-[#1A1A2E] placeholder-[#9CA3AF] rounded-[10px] px-3 py-2.5 text-sm focus:outline-none focus:border-[#7C5CBF] focus:ring-2 focus:ring-[#EDE9F8]" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Senha (mín. 6 caracteres)</label>
+              <label className="block text-xs font-bold text-[#6B7280] mb-1">Senha (mín. 6 caracteres)</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6}
-                className="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full bg-white border border-black/[0.08] text-[#1A1A2E] placeholder-[#9CA3AF] rounded-[10px] px-3 py-2.5 text-sm focus:outline-none focus:border-[#7C5CBF] focus:ring-2 focus:ring-[#EDE9F8]" />
             </div>
             <button type="submit" disabled={loading}
-              className="bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
+              className="bg-[#7C5CBF] text-white rounded-full py-2.5 text-sm font-bold hover:bg-[#9B7DD4] disabled:opacity-50 transition-colors">
               {loading ? 'Criando conta...' : 'Criar conta'}
             </button>
           </form>
         )}
-        <p className="text-center text-sm text-gray-500 mt-4">
-          Já tem conta? <Link to="/login" className="text-blue-400 hover:text-blue-300">Entrar</Link>
+        <p className="text-center text-sm text-[#9CA3AF] mt-4">
+          Já tem conta? <Link to="/login" className="text-[#7C5CBF] hover:text-[#9B7DD4] font-bold">Entrar</Link>
         </p>
       </div>
     </div>

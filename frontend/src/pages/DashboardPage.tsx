@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import api from '../api/client'
 
 interface Event {
@@ -16,14 +16,14 @@ interface Event {
 
 const typeLabel: Record<string, string> = { PRESENCIAL: 'Presencial', ONLINE: 'Online', HIBRIDO: 'Híbrido' }
 const typeColor: Record<string, string> = {
-  PRESENCIAL: 'bg-blue-500/20 text-blue-400',
-  ONLINE: 'bg-purple-500/20 text-purple-400',
-  HIBRIDO: 'bg-orange-500/20 text-orange-400',
+  PRESENCIAL: 'bg-[#EDE9F8] text-[#7C5CBF]',
+  ONLINE: 'bg-[#D9F0FC] text-[#0C6E93]',
+  HIBRIDO: 'bg-[#FEF3CD] text-[#92610A]',
 }
 const statusColor: Record<string, string> = {
-  RASCUNHO: 'bg-gray-700 text-gray-400',
-  EM_ANDAMENTO: 'bg-amber-500/20 text-amber-400',
-  CONCLUIDO: 'bg-emerald-500/20 text-emerald-400',
+  RASCUNHO: 'bg-[#F8F7FC] text-[#9CA3AF] border border-black/[0.08]',
+  EM_ANDAMENTO: 'bg-[#D9F0FC] text-[#0C6E93]',
+  CONCLUIDO: 'bg-[#D4EDDA] text-[#155724]',
 }
 const statusLabel: Record<string, string> = { RASCUNHO: 'Rascunho', EM_ANDAMENTO: 'Em andamento', CONCLUIDO: 'Concluído' }
 
@@ -53,167 +53,79 @@ function buildChartData(events: Event[]) {
   return months
 }
 
-interface SalesSummary {
-  ticketRevenue: number
-  offerRevenue: number
-  totalExpenses: number
-}
-
-function useSalesSummaries(eventIds: string[]) {
-  return useQuery<Record<string, SalesSummary>>({
-    queryKey: ['sales-summaries', eventIds],
-    queryFn: async () => {
-      const results: Record<string, SalesSummary> = {}
-      await Promise.all(
-        eventIds.map(async (eid) => {
-          try {
-            const { data } = await api.get(`/events/${eid}/sales-summary`)
-            results[eid] = data
-          } catch {
-            results[eid] = { ticketRevenue: 0, offerRevenue: 0, totalExpenses: 0 }
-          }
-        })
-      )
-      return results
-    },
-    enabled: eventIds.length > 0,
-  })
-}
-
-function fmt(v: number) {
-  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
-}
-
 export default function DashboardPage() {
   const { data: events, isLoading } = useQuery<Event[]>({
     queryKey: ['events'],
     queryFn: () => api.get('/events').then(r => r.data),
   })
 
-  const eventIds = events?.map(e => e.id) ?? []
-  const { data: summaries } = useSalesSummaries(eventIds)
-
-  if (isLoading) return <p className="text-gray-500 text-sm">Carregando...</p>
+  if (isLoading) return <p className="text-sm text-[#9CA3AF]">Carregando...</p>
 
   const total = events?.length ?? 0
   const emAndamento = events?.filter(e => e.status === 'EM_ANDAMENTO').length ?? 0
   const concluido = events?.filter(e => e.status === 'CONCLUIDO').length ?? 0
   const chartData = buildChartData(events ?? [])
 
-  const totalTicketRevenue = Object.values(summaries ?? {}).reduce((s, v) => s + v.ticketRevenue, 0)
-  const totalOfferRevenue = Object.values(summaries ?? {}).reduce((s, v) => s + v.offerRevenue, 0)
-  const totalExpenses = Object.values(summaries ?? {}).reduce((s, v) => s + v.totalExpenses, 0)
-
-  const salesBarData = events
-    ?.filter(e => summaries?.[e.id])
-    .map(e => ({
-      name: e.name.length > 14 ? e.name.slice(0, 13) + '…' : e.name,
-      Gastos: Math.round(summaries![e.id].totalExpenses),
-      Convites: Math.round(summaries![e.id].ticketRevenue),
-      Oferta: Math.round(summaries![e.id].offerRevenue),
-    }))
-    .filter(d => d.Gastos || d.Convites || d.Oferta) ?? []
-
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Eventos</h1>
-          <p className="text-sm text-gray-500">{total} evento(s) cadastrado(s)</p>
+          <h1 className="text-[22px] font-bold text-[#1A1A2E]">Eventos</h1>
+          <p className="text-sm text-[#6B7280]">{total} evento(s) cadastrado(s)</p>
         </div>
         <Link to="/events/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+          className="bg-[#7C5CBF] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[#9B7DD4] transition-colors">
           + Novo Evento
         </Link>
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total de Eventos</p>
-          <p className="text-3xl font-bold text-white">{total}</p>
+        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5">
+          <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em] mb-2">Total de Eventos</p>
+          <p className="text-[28px] font-bold text-[#1A1A2E]">{total}</p>
         </div>
-        <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Em Andamento</p>
-          <p className="text-3xl font-bold text-amber-400">{emAndamento}</p>
+        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5">
+          <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em] mb-2">Em Andamento</p>
+          <p className="text-[28px] font-bold text-[#0C6E93]">{emAndamento}</p>
         </div>
-        <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Concluídos</p>
-          <p className="text-3xl font-bold text-emerald-400">{concluido}</p>
+        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5">
+          <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em] mb-2">Concluídos</p>
+          <p className="text-[28px] font-bold text-[#155724]">{concluido}</p>
         </div>
       </div>
 
       {/* Chart */}
       {total > 0 && (
-        <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 mb-6">
-          <p className="text-sm font-semibold text-gray-300 mb-4">Eventos criados por mês</p>
+        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5 mb-6">
+          <p className="text-sm font-bold text-[#1A1A2E] mb-4">Eventos criados por mês</p>
           <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <defs>
-                <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#60A5FA" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#60A5FA" stopOpacity={0} />
+                <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#7C5CBF" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#7C5CBF" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-              <XAxis dataKey="month" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis allowDecimals={false} tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E0F3" />
+              <XAxis dataKey="month" tick={{ fill: '#9CA3AF', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} tick={{ fill: '#9CA3AF', fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 8, color: '#f9fafb', fontSize: 12 }}
-                labelStyle={{ color: '#9ca3af' }}
+                contentStyle={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#1A1A2E', fontSize: 12 }}
+                labelStyle={{ color: '#6B7280' }}
               />
-              <Area type="monotone" dataKey="count" stroke="#60A5FA" strokeWidth={2} fill="url(#blueGrad)" name="Eventos" />
+              <Area type="monotone" dataKey="count" stroke="#7C5CBF" strokeWidth={2} fill="url(#purpleGrad)" name="Eventos" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
 
-      {/* Revenue summary */}
-      {summaries && salesBarData.length > 0 && (
-        <>
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5">
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Receita Convites</p>
-              <p className="text-2xl font-bold text-emerald-400">{fmt(totalTicketRevenue)}</p>
-            </div>
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5">
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Receita Oferta</p>
-              <p className="text-2xl font-bold text-blue-400">{fmt(totalOfferRevenue)}</p>
-            </div>
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5">
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Gastos Totais</p>
-              <p className="text-2xl font-bold text-red-400">{fmt(totalExpenses)}</p>
-            </div>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 mb-6">
-            <p className="text-sm font-semibold text-gray-300 mb-4">Gastos vs Receita por Evento</p>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={salesBarData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => fmt(v).replace('R$ ', 'R$')} />
-                <Tooltip
-                  contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 8, color: '#f9fafb', fontSize: 12 }}
-                  labelStyle={{ color: '#9ca3af' }}
-                  formatter={(v) => typeof v === 'number' ? fmt(v) : String(v)}
-                />
-                <Legend wrapperStyle={{ color: '#6b7280', fontSize: 12 }} />
-                <Bar dataKey="Gastos" fill="#f87171" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Convites" fill="#34d399" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Oferta" fill="#60a5fa" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </>
-      )}
-
       {/* Events grid */}
       {!events?.length ? (
-        <div className="text-center py-16 text-gray-600">
+        <div className="text-center py-16">
           <p className="text-4xl mb-3">📅</p>
-          <p className="font-medium text-gray-500">Nenhum evento ainda</p>
-          <p className="text-sm mt-1 text-gray-600">Clique em "Novo Evento" para começar</p>
+          <p className="font-bold text-[#1A1A2E]">Nenhum evento ainda</p>
+          <p className="text-sm mt-1 text-[#9CA3AF]">Clique em "Novo Evento" para começar</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -221,26 +133,26 @@ export default function DashboardPage() {
             const progress = calcProgress(event)
             return (
               <Link key={event.id} to={`/events/${event.id}`}
-                className="bg-gray-900 border border-gray-700 rounded-2xl p-5 hover:border-gray-600 hover:bg-gray-800 transition-colors">
+                className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5 hover:shadow-[0_4px_16px_rgba(124,92,191,0.12)] transition-shadow block">
                 <div className="flex items-start justify-between mb-3">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${typeColor[event.eventType]}`}>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${typeColor[event.eventType]}`}>
                     {typeLabel[event.eventType]}
                   </span>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor[event.status]}`}>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${statusColor[event.status]}`}>
                     {statusLabel[event.status]}
                   </span>
                 </div>
-                <h2 className="font-semibold text-white mb-1">{event.name}</h2>
-                <p className="text-xs text-gray-500 mb-4">
+                <h2 className="font-bold text-[#1A1A2E] mb-1">{event.name}</h2>
+                <p className="text-xs text-[#9CA3AF] mb-4">
                   {new Date(event.startDate).toLocaleDateString('pt-BR')} · {event.totalDays} dia(s)
                 </p>
                 <div>
-                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <div className="flex justify-between text-xs text-[#9CA3AF] mb-1">
                     <span>Checklist</span>
                     <span>{progress}%</span>
                   </div>
-                  <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                  <div className="h-1.5 bg-[#EDE9F8] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#7C5CBF] rounded-full transition-all" style={{ width: `${progress}%` }} />
                   </div>
                 </div>
               </Link>
