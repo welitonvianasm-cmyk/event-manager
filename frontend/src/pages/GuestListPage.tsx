@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams, Link } from 'react-router-dom'
 import api from '../api/client'
 
-type TicketFilter = 'all' | 'paid' | 'courtesy' | 'Normal' | 'VIP' | 'Premium'
+type TicketFilter = 'all' | 'paid' | 'courtesy' | 'Normal' | 'VIP' | 'Premium' | 'confirmed' | 'checkedIn'
 
 const inp = 'w-full bg-white border border-black/[0.08] text-[#1A1A2E] placeholder-[#9CA3AF] rounded-[10px] px-3 py-2 text-sm focus:outline-none focus:border-[#7C5CBF] focus:ring-2 focus:ring-[#EDE9F8]'
 const lbl = 'block text-xs font-bold text-[#6B7280] mb-1'
@@ -73,10 +73,12 @@ export default function GuestListPage() {
         const sale = saleByGuestId[g.id]
         if (ticketFilter === 'paid') return sale && sale.unitPrice > 0
         if (ticketFilter === 'courtesy') return sale && sale.unitPrice === 0
+        if (ticketFilter === 'confirmed') return g.confirmed
+        if (ticketFilter === 'checkedIn') return g.checkedIn
         return sale && sale.ticketType?.name === ticketFilter
       })
     }
-    return list
+    return [...list].sort((a: any, b: any) => a.name.localeCompare(b.name, 'pt-BR'))
   }, [guests, search, ticketFilter, saleByGuestId])
 
   const addGuest = useMutation({
@@ -138,6 +140,8 @@ export default function GuestListPage() {
 
   const filterChips: { value: TicketFilter; label: string }[] = [
     { value: 'all', label: 'Todos' },
+    { value: 'confirmed', label: 'Confirmados' },
+    { value: 'checkedIn', label: 'Credenciados' },
     { value: 'paid', label: 'Pagantes' },
     { value: 'courtesy', label: 'Cortesia' },
     { value: 'Normal', label: 'Normal' },
@@ -381,7 +385,18 @@ export default function GuestListPage() {
                         <span className="text-xs text-[#9CA3AF]">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-[#6B7280]">{g.phone ?? '—'}</td>
+                    <td className="px-4 py-3 text-[#6B7280]">
+                      {g.phone ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[#6B7280]">{g.phone}</span>
+                          <a href={`https://wa.me/55${g.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"
+                            title="Conversar no WhatsApp"
+                            className="text-[#4CD080] hover:text-[#38a167] text-xs font-bold border border-[#4CD080]/40 rounded-full px-2 py-0.5 hover:bg-[#D4EDDA] transition-colors">
+                            💬
+                          </a>
+                        </div>
+                      ) : '—'}
+                    </td>
                     <td className="px-4 py-3 text-[#6B7280]">{g.email ?? '—'}</td>
                     <td className="px-4 py-3 text-center">
                       <input type="checkbox" checked={g.confirmed}

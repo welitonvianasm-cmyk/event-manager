@@ -200,6 +200,111 @@ function PeoplePanel({ eventId }: { eventId: string }) {
   )
 }
 
+// ─── NPS Card ─────────────────────────────────────────────────────────────────
+
+function NpsCard({ event }: { event: any }) {
+  const qc = useQueryClient()
+  const [editing, setEditing] = useState(false)
+  const [form, setForm] = useState({
+    npsFormUrl: event.npsFormUrl ?? '',
+    npsOverallRating: event.npsOverallRating != null ? String(event.npsOverallRating) : '',
+    npsSatisfaction: event.npsSatisfaction != null ? String(event.npsSatisfaction) : '',
+  })
+
+  const save = useMutation({
+    mutationFn: (data: object) => api.patch(`/events/${event.id}/nps`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['event', event.id] })
+      setEditing(false)
+    },
+  })
+
+  function handleSave() {
+    save.mutate({
+      npsFormUrl: form.npsFormUrl || null,
+      npsOverallRating: form.npsOverallRating ? parseFloat(form.npsOverallRating) : null,
+      npsSatisfaction: form.npsSatisfaction ? parseFloat(form.npsSatisfaction) : null,
+    })
+  }
+
+  const inpCls = 'bg-white border border-black/[0.08] text-[#1A1A2E] placeholder-[#9CA3AF] rounded-[10px] px-3 py-2 text-sm focus:outline-none focus:border-[#7C5CBF] focus:ring-2 focus:ring-[#EDE9F8]'
+
+  return (
+    <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-bold text-[#1A1A2E]">NPS Pós-Evento</h2>
+        <button onClick={() => { setEditing(e => !e); setForm({ npsFormUrl: event.npsFormUrl ?? '', npsOverallRating: event.npsOverallRating != null ? String(event.npsOverallRating) : '', npsSatisfaction: event.npsSatisfaction != null ? String(event.npsSatisfaction) : '' }) }}
+          className="text-xs text-[#7C5CBF] hover:text-[#9B7DD4] font-bold transition-colors">
+          {editing ? 'Cancelar' : '✏️ Editar'}
+        </button>
+      </div>
+
+      {editing ? (
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-[#6B7280] mb-1">Avaliação Geral (0–10)</label>
+              <input type="number" min="0" max="10" step="0.1" value={form.npsOverallRating}
+                onChange={e => setForm(f => ({ ...f, npsOverallRating: e.target.value }))}
+                placeholder="Ex: 8.5" className={`w-full ${inpCls}`} />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#6B7280] mb-1">Satisfação dos Participantes (0–10)</label>
+              <input type="number" min="0" max="10" step="0.1" value={form.npsSatisfaction}
+                onChange={e => setForm(f => ({ ...f, npsSatisfaction: e.target.value }))}
+                placeholder="Ex: 9.0" className={`w-full ${inpCls}`} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-[#6B7280] mb-1">Link do formulário de avaliação</label>
+            <input value={form.npsFormUrl}
+              onChange={e => setForm(f => ({ ...f, npsFormUrl: e.target.value }))}
+              placeholder="https://forms.gle/..."
+              className={`w-full ${inpCls}`} />
+          </div>
+          <div className="flex gap-2 mt-1">
+            <button onClick={handleSave} disabled={save.isPending}
+              className="bg-[#7C5CBF] text-white rounded-full px-5 py-2 text-sm font-bold hover:bg-[#9B7DD4] transition-colors disabled:opacity-50">
+              {save.isPending ? 'Salvando...' : 'Salvar'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-[#EDE9F8] rounded-[10px] p-4 text-center">
+              <p className="text-[9px] font-bold text-[#7C5CBF] uppercase tracking-[0.1em] mb-1">Avaliação Geral</p>
+              <p className="text-2xl font-bold text-[#7C5CBF]">{event.npsOverallRating != null ? event.npsOverallRating : '—'}</p>
+              {event.npsOverallRating != null && <p className="text-[9px] text-[#7C5CBF]/70">de 10</p>}
+            </div>
+            <div className="bg-[#D4EDDA] rounded-[10px] p-4 text-center">
+              <p className="text-[9px] font-bold text-[#155724] uppercase tracking-[0.1em] mb-1">Satisfação</p>
+              <p className="text-2xl font-bold text-[#155724]">{event.npsSatisfaction != null ? event.npsSatisfaction : '—'}</p>
+              {event.npsSatisfaction != null && <p className="text-[9px] text-[#155724]/70">de 10</p>}
+            </div>
+            <div className="bg-[#F8F7FC] rounded-[10px] p-4 text-center flex flex-col items-center justify-center">
+              {event.npsFormUrl ? (
+                <>
+                  <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-[0.1em] mb-2">Formulário</p>
+                  <a href={event.npsFormUrl} target="_blank" rel="noopener noreferrer"
+                    className="text-xs bg-[#7C5CBF] text-white px-3 py-1.5 rounded-full font-bold hover:bg-[#9B7DD4] transition-colors">
+                    Abrir ↗
+                  </a>
+                </>
+              ) : (
+                <p className="text-xs text-[#9CA3AF]">Sem link de formulário</p>
+              )}
+            </div>
+          </div>
+          {event.npsOverallRating == null && event.npsSatisfaction == null && !event.npsFormUrl && (
+            <p className="text-sm text-[#9CA3AF] text-center py-2">Nenhuma avaliação registrada ainda. Clique em Editar para adicionar.</p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Sales Summary Card ───────────────────────────────────────────────────────
 
 function SalesSummaryCard({ eventId }: { eventId: string }) {
@@ -238,8 +343,11 @@ function SalesSummaryCard({ eventId }: { eventId: string }) {
           <p className="text-xl font-bold text-[#C0392B]">{fmt(summary?.totalExpenses ?? 0)}</p>
         </div>
         <div className={`rounded-[10px] p-4 ${saldo >= 0 ? 'bg-[#EDE9F8]' : 'bg-[#FEF3CD]'}`}>
-          <p className={`text-[9px] font-bold uppercase tracking-[0.1em] mb-1 ${saldo >= 0 ? 'text-[#7C5CBF]' : 'text-[#92610A]'}`}>Saldo</p>
-          <p className={`text-xl font-bold ${saldo >= 0 ? 'text-[#7C5CBF]' : 'text-[#92610A]'}`}>{fmt(saldo)}</p>
+          <p className={`text-[9px] font-bold uppercase tracking-[0.1em] mb-1 ${saldo >= 0 ? 'text-[#7C5CBF]' : 'text-[#92610A]'}`}>Lucro</p>
+          <p className={`text-2xl font-bold ${saldo >= 0 ? 'text-[#7C5CBF]' : 'text-[#92610A]'}`}>{fmt(saldo)}</p>
+          <p className={`text-[9px] mt-0.5 ${saldo >= 0 ? 'text-[#7C5CBF]/70' : 'text-[#92610A]/70'}`}>
+            {saldo >= 0 ? '✓ Lucrativo' : '⚠ No prejuízo'}
+          </p>
         </div>
       </div>
     </div>
@@ -261,11 +369,14 @@ export default function EventPage() {
     queryFn: () => api.get(`/events/${id}`).then(r => r.data),
   })
 
-  const { data: guestsCount = 0 } = useQuery<number>({
-    queryKey: ['guests-count', id],
-    queryFn: () => api.get(`/events/${id}/guests`).then(r => r.data.length),
+  const { data: guestsList = [] } = useQuery<any[]>({
+    queryKey: ['guests', id],
+    queryFn: () => api.get(`/events/${id}/guests`).then(r => r.data),
     enabled: !!id,
   })
+  const guestsCount = guestsList.length
+  const guestsConfirmed = guestsList.filter(g => g.confirmed).length
+  const guestsCheckedIn = guestsList.filter(g => g.checkedIn).length
 
   const { data: deadlines = [] } = useQuery<any[]>({
     queryKey: ['calendar', id],
@@ -428,6 +539,33 @@ export default function EventPage() {
         </div>
       )}
 
+      {/* People Summary */}
+      <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-[#1A1A2E]">Participantes</h2>
+          <Link to={`/events/${id}/guests`} className="text-xs text-[#7C5CBF] hover:text-[#9B7DD4] font-bold transition-colors">
+            Ver lista →
+          </Link>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-[#F8F7FC] rounded-[10px] p-4 text-center">
+            <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em] mb-1">Total</p>
+            <p className="text-2xl font-bold text-[#1A1A2E]">{guestsCount}</p>
+            <p className="text-[9px] text-[#9CA3AF] mt-0.5">na lista</p>
+          </div>
+          <div className="bg-[#D4EDDA] rounded-[10px] p-4 text-center">
+            <p className="text-[9px] font-bold text-[#155724] uppercase tracking-[0.1em] mb-1">Confirmados</p>
+            <p className="text-2xl font-bold text-[#155724]">{guestsConfirmed}</p>
+            <p className="text-[9px] text-[#155724]/70 mt-0.5">presença confirmada</p>
+          </div>
+          <div className="bg-[#D9F0FC] rounded-[10px] p-4 text-center">
+            <p className="text-[9px] font-bold text-[#0C6E93] uppercase tracking-[0.1em] mb-1">Credenciados</p>
+            <p className="text-2xl font-bold text-[#0C6E93]">{guestsCheckedIn}</p>
+            <p className="text-[9px] text-[#0C6E93]/70 mt-0.5">presentes no evento</p>
+          </div>
+        </div>
+      </div>
+
       {/* Sales Summary */}
       <SalesSummaryCard eventId={id!} />
 
@@ -447,6 +585,9 @@ export default function EventPage() {
       <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-6 mb-6">
         <PeoplePanel eventId={id!} />
       </div>
+
+      {/* NPS */}
+      <NpsCard event={event} />
 
       {/* Upcoming deadlines */}
       {upcoming.length > 0 && (

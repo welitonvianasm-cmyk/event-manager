@@ -27,7 +27,7 @@ interface Installment { number: number; dueDate: string; value: string; paid: bo
 
 const emptyForm = {
   category: 'MATERIAL_EVENTO', description: '', supplierName: '', supplierPhone: '',
-  supplierContact: '', quantity: '', unitPrice: '', notes: '',
+  supplierContact: '', quantity: '', unitPrice: '', shippingCost: '', notes: '',
   status: 'PENDENTE', paymentStatus: 'PENDENTE', paymentDueDate: '',
   paymentType: '' as string, responsible: '', responsiblePersonId: '',
   catalogMaterialId: '', catalogSupplierId: '',
@@ -99,7 +99,7 @@ export default function SuppliersPage() {
     setForm({
       category: item.category, description: item.description, supplierName: item.supplierName ?? '',
       supplierPhone: item.supplierPhone ?? '', supplierContact: item.supplierContact ?? '',
-      quantity: item.quantity != null ? String(item.quantity) : '', unitPrice: item.unitPrice != null ? String(item.unitPrice) : '',
+      quantity: item.quantity != null ? String(item.quantity) : '', unitPrice: item.unitPrice != null ? String(item.unitPrice) : '', shippingCost: item.shippingCost != null ? String(item.shippingCost) : '',
       notes: item.notes ?? '', status: item.status, paymentStatus: item.paymentStatus,
       paymentDueDate: toFormDate(item.paymentDueDate), paymentType: item.paymentType ?? '',
       responsible: item.responsible ?? '', responsiblePersonId: item.responsiblePersonId ?? '',
@@ -140,6 +140,7 @@ export default function SuppliersPage() {
       ...form,
       quantity: form.quantity ? parseFloat(form.quantity) : undefined,
       unitPrice: form.unitPrice ? parseFloat(form.unitPrice) : undefined,
+      shippingCost: form.shippingCost ? parseFloat(form.shippingCost) : undefined,
       catalogMaterialId: form.catalogMaterialId || undefined,
       catalogSupplierId: form.catalogSupplierId || undefined,
       responsiblePersonId: form.responsiblePersonId || undefined,
@@ -214,6 +215,8 @@ export default function SuppliersPage() {
                   <input type="number" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} className={inpSm} /></div>
                 <div><label className={lbl}>Preço unitário (R$)</label>
                   <input type="number" step="0.01" value={form.unitPrice} onChange={e => setForm(f => ({ ...f, unitPrice: e.target.value }))} className={inpSm} /></div>
+                <div><label className={lbl}>Frete / Gasto adicional (R$)</label>
+                  <input type="number" step="0.01" value={form.shippingCost} onChange={e => setForm(f => ({ ...f, shippingCost: e.target.value }))} placeholder="0,00" className={inpSm} /></div>
                 <div><label className={lbl}>Responsável (equipe)</label>
                   <select value={form.responsiblePersonId} onChange={e => setForm(f => ({ ...f, responsiblePersonId: e.target.value }))} className={inpSm}>
                     <option value="">— Nenhum —</option>
@@ -300,7 +303,7 @@ export default function SuppliersPage() {
               </div>
               <div className="divide-y divide-black/[0.06]">
                 {items.map(item => {
-                  const subtotal = (item.quantity ?? 1) * (item.unitPrice ?? 0)
+                  const subtotal = (item.quantity ?? 1) * (item.unitPrice ?? 0) + (item.shippingCost ?? 0)
                   const isExpanded = expandedId === item.id
                   const paidInstallments = item.installments?.filter((i: any) => i.paid).length ?? 0
                   const totalInstallments = item.installments?.length ?? 0

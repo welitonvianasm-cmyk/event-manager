@@ -209,15 +209,30 @@ export default function TicketSalesPage() {
     }
   }
 
+  // ─── Offers filter ───────────────────────────────────────────────────────────
+
+  const [payFilter, setPayFilter] = useState<'all' | 'avista' | 'parcelado' | 'entrada'>('all')
+
+  const filteredOffers = offerSales.filter(o => {
+    if (payFilter === 'avista') return !o.isEntrada && !o.installments
+    if (payFilter === 'parcelado') return !o.isEntrada && !!o.installments
+    if (payFilter === 'entrada') return o.isEntrada
+    return true
+  })
+
   // ─── Stats ────────────────────────────────────────────────────────────────────
 
   const ticketRevenue = ticketSales.reduce((s, t) => s + t.totalPrice, 0)
   const ticketCount = ticketSales.reduce((s, t) => s + t.quantity, 0)
   const courtesyCount = ticketSales.filter(t => t.unitPrice === 0).reduce((s, t) => s + t.quantity, 0)
 
-  const offerRevenue = offerSales.reduce((s, o) => s + o.value, 0)
-  const offerCount = offerSales.length
-  const avgOffer = offerCount ? offerRevenue / offerCount : 0
+  const totalOffer = offerSales.reduce((s, o) => s + o.value, 0)
+  const avistaCount = offerSales.filter(o => !o.isEntrada && !o.installments).length
+  const avistaTotal = offerSales.filter(o => !o.isEntrada && !o.installments).reduce((s, o) => s + o.value, 0)
+  const parceladoCount = offerSales.filter(o => !o.isEntrada && !!o.installments).length
+  const parceladoTotal = offerSales.filter(o => !o.isEntrada && !!o.installments).reduce((s, o) => s + o.value, 0)
+  const entradaCount = offerSales.filter(o => o.isEntrada).length
+  const entradaTotal = offerSales.filter(o => o.isEntrada).reduce((s, o) => s + o.value, 0)
 
   return (
     <div>
@@ -316,33 +331,55 @@ export default function TicketSalesPage() {
       {/* ─── Offers tab ──────────────────────────────────────────────────────────── */}
       {tab === 'offers' && (
         <div>
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
-              <p className="text-2xl font-bold text-[#4CD080]">{fmt(offerRevenue)}</p>
-              <p className="text-xs text-[#9CA3AF] mt-0.5">Total arrecadado</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <div className="bg-[#EDE9F8] rounded-[14px] p-4 text-center">
+              <p className="text-[9px] font-bold text-[#7C5CBF] uppercase tracking-[0.1em] mb-1">Total Geral</p>
+              <p className="text-xl font-bold text-[#7C5CBF]">{fmt(totalOffer)}</p>
+              <p className="text-xs text-[#7C5CBF]/70 mt-0.5">{offerSales.length} vendas</p>
             </div>
-            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
-              <p className="text-2xl font-bold text-[#1A1A2E]">{offerCount}</p>
-              <p className="text-xs text-[#9CA3AF] mt-0.5">Vendas realizadas</p>
+            <div className="bg-[#D4EDDA] rounded-[14px] p-4 text-center">
+              <p className="text-[9px] font-bold text-[#155724] uppercase tracking-[0.1em] mb-1">À Vista</p>
+              <p className="text-xl font-bold text-[#155724]">{fmt(avistaTotal)}</p>
+              <p className="text-xs text-[#155724]/70 mt-0.5">{avistaCount} venda(s)</p>
             </div>
-            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
-              <p className="text-2xl font-bold text-[#7C5CBF]">{fmt(avgOffer)}</p>
-              <p className="text-xs text-[#9CA3AF] mt-0.5">Ticket médio</p>
+            <div className="bg-[#FEF3CD] rounded-[14px] p-4 text-center">
+              <p className="text-[9px] font-bold text-[#92610A] uppercase tracking-[0.1em] mb-1">Entrada</p>
+              <p className="text-xl font-bold text-[#92610A]">{fmt(entradaTotal)}</p>
+              <p className="text-xs text-[#92610A]/70 mt-0.5">{entradaCount} venda(s)</p>
+            </div>
+            <div className="bg-[#D9F0FC] rounded-[14px] p-4 text-center">
+              <p className="text-[9px] font-bold text-[#0C6E93] uppercase tracking-[0.1em] mb-1">Parcelado</p>
+              <p className="text-xl font-bold text-[#0C6E93]">{fmt(parceladoTotal)}</p>
+              <p className="text-xs text-[#0C6E93]/70 mt-0.5">{parceladoCount} venda(s)</p>
             </div>
           </div>
 
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm text-[#6B7280]">{offerSales.length} venda(s) registrada(s)</p>
+          <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
+            <div className="flex gap-2 flex-wrap">
+              {([['all','Todos'],['avista','À Vista'],['entrada','Entrada'],['parcelado','Parcelado']] as const).map(([val, label]) => (
+                <button key={val} onClick={() => setPayFilter(val)}
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${payFilter === val ? 'bg-[#7C5CBF] text-white' : 'bg-white text-[#6B7280] border border-black/[0.08] hover:border-[#7C5CBF] hover:text-[#7C5CBF]'}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-[#6B7280]">{filteredOffers.length} venda(s)</p>
             <button onClick={openNewOffer}
               className="bg-[#7C5CBF] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[#9B7DD4] transition-colors">
               + Registrar Venda
             </button>
+            </div>
           </div>
 
           {offerSales.length === 0 ? (
             <div className="text-center py-16 text-[#9CA3AF]">
               <p className="text-4xl mb-3">💰</p>
               <p className="text-sm">Nenhuma venda de oferta registrada</p>
+            </div>
+          ) : filteredOffers.length === 0 ? (
+            <div className="text-center py-10 text-[#9CA3AF]">
+              <p className="text-sm">Nenhuma venda com este filtro</p>
             </div>
           ) : (
             <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] overflow-hidden">
@@ -358,7 +395,7 @@ export default function TicketSalesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {offerSales.map(o => (
+                  {filteredOffers.map(o => (
                     <tr key={o.id} className="border-b border-black/[0.06] last:border-0 hover:bg-[#F8F7FC]">
                       <td className="px-4 py-3 font-bold text-[#1A1A2E]">{o.guestName}</td>
                       <td className="px-4 py-3 text-[#6B7280]">{o.cpf ?? '—'}</td>

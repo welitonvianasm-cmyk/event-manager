@@ -225,7 +225,7 @@ router.get('/:id/sales-summary', async (req: AuthRequest, res: Response) => {
   const totalExpenses = suppliers.reduce((s, sup) => {
     const qty = sup.quantity ?? 1
     const price = sup.unitPrice ?? 0
-    return s + qty * price
+    return s + qty * price + (sup.shippingCost ?? 0)
   }, 0)
 
   res.json({

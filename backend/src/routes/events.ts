@@ -20,6 +20,32 @@ const eventSchema = z.object({
   status: z.enum(['RASCUNHO', 'EM_ANDAMENTO', 'CONCLUIDO']).optional(),
 })
 
+// ─── Aggregate financial summary (all events) ────────────────────────────────
+// NOTE: must be before /:id to avoid route conflict
+
+router.get('/all-financial', async (req: AuthRequest, res: Response) => {
+  const events = await prisma.event.findMany({
+    where: { userId: req.userId! },
+    select: { id: true, name: true, startDate: true },
+    orderBy: { startDate: 'asc' },
+  })
+
+  const summaries = await Promise.all(events.map(async (event) => {
+    const [ticketSales, offerSales, suppliers] = await Promise.all([
+      prisma.ticketSale.findMany({ where: { eventId: event.id } }),
+      prisma.offerSale.findMany({ where: { eventId: event.id } }),
+      prisma.eventSupplier.findMany({ where: { eventId: event.id } }),
+    ])
+    const ticketRevenue = ticketSales.reduce((s, t) => s + t.totalPrice, 0)
+    const offerRevenue = offerSales.reduce((s, o) => s + o.value, 0)
+    const totalExpenses = suppliers.reduce((s, sup) => s + (sup.quantity ?? 1) * (sup.unitPrice ?? 0) + (sup.shippingCost ?? 0), 0)
+    const totalRevenue = ticketRevenue + offerRevenue
+    return { id: event.id, name: event.name, startDate: event.startDate, ticketRevenue, offerRevenue, totalRevenue, totalExpenses, profit: totalRevenue - totalExpenses }
+  }))
+
+  res.json(summaries)
+})
+
 router.get('/', async (req: AuthRequest, res: Response) => {
   const events = await prisma.event.findMany({
     where: { userId: req.userId! },
@@ -217,6 +243,23 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     }
   }
 
+  res.json(updated)
+})
+
+// ─── NPS Pós-Evento ───────────────────────────────────────────────────────────
+
+const npsSchema = z.object({
+  npsFormUrl: z.string().nullable().optional(),
+  npsOverallRating: z.number().min(0).max(10).nullable().optional(),
+  npsSatisfaction: z.number().min(0).max(10).nullable().optional(),
+})
+
+router.patch('/:id/nps', async (req: AuthRequest, res: Response) => {
+  const exists = await prisma.event.findFirst({ where: { id: req.params.id, userId: req.userId! } })
+  if (!exists) { res.status(404).json({ error: 'Evento não encontrado' }); return }
+  const parsed = npsSchema.safeParse(req.body)
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
+  const updated = await prisma.event.update({ where: { id: req.params.id }, data: parsed.data })
   res.json(updated)
 })
 

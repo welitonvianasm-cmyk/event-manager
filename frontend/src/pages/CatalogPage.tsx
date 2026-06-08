@@ -22,6 +22,7 @@ export default function CatalogPage() {
   const [matForm, setMatForm] = useState({ name: '', category: 'MATERIAL_EVENTO', preferredSupplierId: '', defaultUnitPrice: '', notes: '' })
   const [showSupForm, setShowSupForm] = useState(false)
   const [showMatForm, setShowMatForm] = useState(false)
+  const [matSupFilter, setMatSupFilter] = useState('')
 
   const addSupplier = useMutation({
     mutationFn: (data: object) => api.post('/catalog/suppliers', data),
@@ -154,9 +155,22 @@ export default function CatalogPage() {
 
       {tab === 'materials' && (
         <div className="flex flex-col gap-3">
+          {(suppliers?.length ?? 0) > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#6B7280] font-bold">Filtrar por fornecedor:</span>
+              <select value={matSupFilter} onChange={e => setMatSupFilter(e.target.value)}
+                className="text-xs bg-white border border-black/[0.08] text-[#6B7280] rounded-[8px] px-3 py-1.5 focus:outline-none focus:border-[#7C5CBF]">
+                <option value="">Todos</option>
+                {suppliers?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+              {matSupFilter && (
+                <button onClick={() => setMatSupFilter('')} className="text-xs text-[#9CA3AF] hover:text-red-400 font-bold">✕</button>
+              )}
+            </div>
+          )}
           {!materials?.length ? (
             <div className="text-center py-12 text-[#9CA3AF]"><p className="text-3xl mb-2">📦</p><p>Nenhum material cadastrado</p></div>
-          ) : materials.map(m => (
+          ) : (matSupFilter ? materials.filter((m: any) => m.preferredSupplierId === matSupFilter) : materials).map((m: any) => (
             <div key={m.id} className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 flex items-center justify-between hover:shadow-[0_4px_16px_rgba(124,92,191,0.12)] transition-shadow">
               <div>
                 <div className="flex items-center gap-2">

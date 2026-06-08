@@ -29,6 +29,7 @@ const supplierSchema = z.object({
   supplierContact: z.string().optional().nullable(),
   quantity: z.number().optional().nullable(),
   unitPrice: z.number().optional().nullable(),
+  shippingCost: z.number().optional().nullable(),
   notes: z.string().optional().nullable(),
   installments: z.array(installmentSchema).optional(),
 })
@@ -59,7 +60,7 @@ router.get('/:id/suppliers', async (req: AuthRequest, res: Response) => {
 router.get('/:id/suppliers/total', async (req: AuthRequest, res: Response) => {
   if (!await assertEventOwner(req.params.id, req.userId!, res)) return
   const suppliers = await prisma.eventSupplier.findMany({ where: { eventId: req.params.id } })
-  const total = suppliers.reduce((sum, s) => sum + (s.quantity ?? 1) * (s.unitPrice ?? 0), 0)
+  const total = suppliers.reduce((sum, s) => sum + (s.quantity ?? 1) * (s.unitPrice ?? 0) + (s.shippingCost ?? 0), 0)
   res.json({ total })
 })
 
