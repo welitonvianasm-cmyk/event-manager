@@ -188,17 +188,17 @@ export default function GuestListPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
-          <p className="text-2xl font-bold text-[#1A1A2E]">{total}</p>
-          <p className="text-xs text-[#9CA3AF] mt-0.5">Total</p>
+        <div className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-4 text-center">
+          <p className="text-2xl font-bold text-white">{total}</p>
+          <p className="text-xs text-white/70 mt-0.5">Total</p>
         </div>
-        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
-          <p className="text-2xl font-bold text-[#4CD080]">{confirmed}</p>
-          <p className="text-xs text-[#9CA3AF] mt-0.5">Confirmados</p>
+        <div className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-4 text-center">
+          <p className="text-2xl font-bold text-white">{confirmed}</p>
+          <p className="text-xs text-white/70 mt-0.5">Confirmados</p>
         </div>
-        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
-          <p className="text-2xl font-bold text-[#7C5CBF]">{checkedIn}</p>
-          <p className="text-xs text-[#9CA3AF] mt-0.5">Credenciados</p>
+        <div className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-4 text-center">
+          <p className="text-2xl font-bold text-white">{checkedIn}</p>
+          <p className="text-xs text-white/70 mt-0.5">Credenciados</p>
         </div>
       </div>
 

@@ -263,17 +263,17 @@ export default function TicketSalesPage() {
       {tab === 'tickets' && (
         <div>
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
-              <p className="text-2xl font-bold text-[#4CD080]">{fmt(ticketRevenue)}</p>
-              <p className="text-xs text-[#9CA3AF] mt-0.5">Total arrecadado</p>
+            <div className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-4 text-center">
+              <p className="text-2xl font-bold text-white">{fmt(ticketRevenue)}</p>
+              <p className="text-xs text-white/70 mt-0.5">Total arrecadado</p>
             </div>
-            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
-              <p className="text-2xl font-bold text-[#1A1A2E]">{ticketCount}</p>
-              <p className="text-xs text-[#9CA3AF] mt-0.5">Convites vendidos</p>
+            <div className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-4 text-center">
+              <p className="text-2xl font-bold text-white">{ticketCount}</p>
+              <p className="text-xs text-white/70 mt-0.5">Convites vendidos</p>
             </div>
-            <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 text-center">
-              <p className="text-2xl font-bold text-[#7C5CBF]">{courtesyCount}</p>
-              <p className="text-xs text-[#9CA3AF] mt-0.5">Cortesias</p>
+            <div className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-4 text-center">
+              <p className="text-2xl font-bold text-white">{courtesyCount}</p>
+              <p className="text-xs text-white/70 mt-0.5">Cortesias</p>
             </div>
           </div>
 

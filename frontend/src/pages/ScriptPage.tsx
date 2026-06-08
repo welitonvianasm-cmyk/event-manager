@@ -228,18 +228,18 @@ function DaySection({ day, eventId, onAdd, onBulkUpdate, onDelete }: {
 
   return (
     <div className="mb-8">
-      <div className={`flex items-center justify-between bg-white border border-black/[0.08] border-l-4 ${dayBorderColors[colorIdx]} rounded-[14px] px-5 py-4 mb-3 shadow-[0_1px_3px_rgba(124,92,191,0.08)]`}>
+      <div className="flex items-center justify-between bg-[#7C5CBF] rounded-[14px] px-5 py-4 mb-3 shadow-[0_1px_3px_rgba(124,92,191,0.3)]">
         <div className="flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-full ${dayBgColors[colorIdx]} flex items-center justify-center text-sm font-bold ${dayTextColors[colorIdx]}`}>
+          <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold text-white">
             {day.dayNumber}
           </div>
           <div>
-            <h2 className="font-bold text-[#1A1A2E] text-lg">{day.label ?? `Dia ${day.dayNumber}`}</h2>
-            <p className="text-xs text-[#9CA3AF]">{items.length} bloco(s) · {items[0]?.startTime ?? '—'} → {items[items.length - 1]?.endTime ?? '—'}</p>
+            <h2 className="font-bold text-white text-lg">{day.label ?? `Dia ${day.dayNumber}`}</h2>
+            <p className="text-xs text-white/70">{items.length} bloco(s) · {items[0]?.startTime ?? '—'} → {items[items.length - 1]?.endTime ?? '—'}</p>
           </div>
         </div>
         <button onClick={onAdd}
-          className="text-sm bg-[#7C5CBF] text-white px-4 py-2 rounded-full hover:bg-[#9B7DD4] transition-colors font-bold">
+          className="text-sm bg-white text-[#7C5CBF] px-4 py-2 rounded-full hover:bg-[#F3F2F8] transition-colors font-bold">
           + Adicionar bloco
         </button>
       </div>

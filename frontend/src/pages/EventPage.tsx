@@ -183,7 +183,7 @@ function PeoplePanel({ eventId }: { eventId: string }) {
         <div className="flex flex-col gap-2">
           {people?.map(p => (
             <div key={p.id} className="flex items-center gap-3 py-2 border-b border-black/[0.08] last:border-0">
-              <div className="w-8 h-8 rounded-full bg-[#EDE9F8] text-[#7C5CBF] flex items-center justify-center text-sm font-bold shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[#7C5CBF] text-white flex items-center justify-center text-sm font-bold shrink-0">
                 {p.name[0].toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -493,11 +493,11 @@ export default function EventPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-6">
         {navItems.map(item => (
           <Link key={item.to} to={item.to}
-            className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5 hover:shadow-[0_4px_16px_rgba(124,92,191,0.12)] transition-shadow flex flex-col items-center justify-center text-center gap-2 min-h-[100px]">
+            className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-5 hover:bg-[#9B7DD4] transition-colors flex flex-col items-center justify-center text-center gap-2 min-h-[100px]">
             <span className="text-2xl">{item.icon}</span>
             <div>
-              <div className="font-bold text-[#1A1A2E] text-sm">{item.label}</div>
-              <div className="text-xs text-[#9CA3AF]">{item.desc}</div>
+              <div className="font-bold text-white text-sm">{item.label}</div>
+              <div className="text-xs text-white/70">{item.desc}</div>
             </div>
           </Link>
         ))}

@@ -48,29 +48,34 @@ export default function ChecklistPage() {
     queryFn: () => api.get(`/events/${id}/people`).then(r => r.data),
   })
 
+  function invalidateAll() {
+    qc.invalidateQueries({ queryKey: ['checklist', id] })
+    qc.invalidateQueries({ queryKey: ['event', id] })
+  }
+
   const updateItem = useMutation({
     mutationFn: (payload: { itemId: string; status?: Status; dueDate?: string | null; personId?: string | null; notes?: string | null }) => {
       const { itemId, ...body } = payload
       return api.patch(`/events/${id}/checklist/${itemId}`, body)
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist', id] }),
+    onSuccess: invalidateAll,
   })
   const deleteItem = useMutation({
     mutationFn: (itemId: string) => api.delete(`/events/${id}/checklist/${itemId}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist', id] }),
+    onSuccess: invalidateAll,
   })
   const addItem = useMutation({
     mutationFn: ({ sectionId, title }: { sectionId: string; title: string }) =>
       api.post(`/events/${id}/checklist/sections/${sectionId}/items`, { title }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist', id] }),
+    onSuccess: invalidateAll,
   })
   const addSection = useMutation({
     mutationFn: (name: string) => api.post(`/events/${id}/checklist/sections`, { name }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist', id] }),
+    onSuccess: invalidateAll,
   })
   const deleteSection = useMutation({
     mutationFn: (sectionId: string) => api.delete(`/events/${id}/checklist/sections/${sectionId}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist', id] }),
+    onSuccess: invalidateAll,
   })
 
   if (isLoading) return <p className="text-sm text-[#9CA3AF]">Carregando...</p>
