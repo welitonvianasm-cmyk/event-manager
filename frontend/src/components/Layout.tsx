@@ -75,15 +75,12 @@ export default function Layout() {
         {/* Logo */}
         <div className="px-5 py-5 border-b border-white/15">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-[10px] flex items-center justify-center shrink-0">
-              <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
-                <polyline points="4,26 13,16 20,22 30,10" stroke="#7C5CBF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-                <polyline points="26,10 34,10 34,18" stroke="#7C5CBF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            <div className="w-10 h-10 bg-[#EDE9F8] rounded-[10px] flex items-center justify-center shrink-0 overflow-hidden">
+              <img src="/favicon.svg" alt="event. logo" className="w-7 h-7" />
             </div>
             <div>
               <span className="font-bold text-white text-[15px] block leading-tight">EventManager</span>
-              <span className="text-[10px] text-white/60">Sistema de Gestão</span>
+              <span className="text-[10px] text-white/60">Sistema de Gestão para Eventos</span>
             </div>
           </div>
         </div>
