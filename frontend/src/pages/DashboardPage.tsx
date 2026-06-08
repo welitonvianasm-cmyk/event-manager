@@ -230,7 +230,7 @@ export default function DashboardPage() {
       )}
 
       {/* Creation chart */}
-      {total > 0 && (
+      {total > 1 && (
         <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5 mb-6">
           <p className="text-sm font-bold text-[#1A1A2E] mb-4">Eventos criados por mês</p>
           <ResponsiveContainer width="100%" height={140}>

@@ -126,6 +126,21 @@ router.post('/:id/ticket-sales', async (req: AuthRequest, res: Response) => {
   res.status(201).json(sale)
 })
 
+router.patch('/:id/ticket-sales/:sid', async (req: AuthRequest, res: Response) => {
+  if (!(await eventBelongsToUser(req.params.id, req.userId!))) {
+    res.status(404).json({ error: 'Evento não encontrado' }); return
+  }
+  const schema = z.object({ guestName: z.string().min(1) })
+  const parsed = schema.safeParse(req.body)
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
+  const updated = await prisma.ticketSale.update({
+    where: { id: req.params.sid },
+    data: parsed.data,
+    include: { ticketType: true, guest: true },
+  })
+  res.json(updated)
+})
+
 router.delete('/:id/ticket-sales/:sid', async (req: AuthRequest, res: Response) => {
   if (!(await eventBelongsToUser(req.params.id, req.userId!))) {
     res.status(404).json({ error: 'Evento não encontrado' }); return

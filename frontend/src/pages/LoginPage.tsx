@@ -33,15 +33,12 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#F3F2F8]">
       <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(124,92,191,0.10)] p-8 w-full max-w-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-[#7C5CBF] rounded-[10px] flex items-center justify-center shrink-0">
-            <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
-              <polyline points="4,26 13,16 20,22 30,10" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="26,10 34,10 34,18" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          <div className="w-10 h-10 bg-[#EDE9F8] rounded-[10px] flex items-center justify-center shrink-0 overflow-hidden">
+            <img src="/favicon.svg" alt="event. logo" className="w-7 h-7" />
           </div>
           <div>
-            <span className="font-bold text-[#1A1A2E] text-[15px] block leading-tight">EventManager</span>
-            <span className="text-[11px] text-[#9CA3AF]">Sistema de Gestão</span>
+            <span className="font-bold text-[#1A1A2E] text-[15px] block leading-tight">event.</span>
+            <span className="text-[11px] text-[#9CA3AF]">Sistema de gestão</span>
           </div>
         </div>
         <h1 className="text-[22px] font-bold text-[#1A1A2E] mb-1">Entrar</h1>

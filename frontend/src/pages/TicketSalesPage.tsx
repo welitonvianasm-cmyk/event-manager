@@ -41,6 +41,8 @@ interface OfferSale {
 interface Guest {
   id: string
   name: string
+  phone?: string
+  email?: string
 }
 
 const LOT_LABELS = ['1º', '2º', '3º', '4º', '5º']
@@ -85,6 +87,46 @@ export default function TicketSalesPage() {
     queryKey: ['guests', id],
     queryFn: () => api.get(`/events/${id}/guests`).then(r => r.data),
   })
+
+  // ─── Edit guest info ──────────────────────────────────────────────────────────
+
+  const [editingTicketGuest, setEditingTicketGuest] = useState<{
+    saleId: string; guestId?: string; name: string; phone: string; email: string
+  } | null>(null)
+
+  const updateGuestInfo = useMutation({
+    mutationFn: ({ gid, data }: { gid: string; data: object }) =>
+      api.patch(`/events/${id}/guests/${gid}`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['guests', id] })
+      qc.invalidateQueries({ queryKey: ['ticket-sales', id] })
+      qc.invalidateQueries({ queryKey: ['offer-sales', id] })
+      setEditingTicketGuest(null)
+    },
+  })
+
+  const updateTicketSaleName = useMutation({
+    mutationFn: ({ sid, guestName }: { sid: string; guestName: string }) =>
+      api.patch(`/events/${id}/ticket-sales/${sid}`, { guestName }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['ticket-sales', id] })
+      setEditingTicketGuest(null)
+    },
+  })
+
+  function openEditTicketGuest(s: TicketSale) {
+    const fullGuest = s.guest ? guests.find(g => g.id === s.guest!.id) : undefined
+    setEditingTicketGuest({ saleId: s.id, guestId: s.guest?.id, name: s.guestName, phone: fullGuest?.phone ?? '', email: fullGuest?.email ?? '' })
+  }
+
+  function saveTicketGuestEdit() {
+    if (!editingTicketGuest) return
+    if (editingTicketGuest.guestId) {
+      updateGuestInfo.mutate({ gid: editingTicketGuest.guestId, data: { name: editingTicketGuest.name, phone: editingTicketGuest.phone || undefined, email: editingTicketGuest.email || undefined } })
+    } else {
+      updateTicketSaleName.mutate({ sid: editingTicketGuest.saleId, guestName: editingTicketGuest.name })
+    }
+  }
 
   // ─── Ticket Sale Modal ────────────────────────────────────────────────────────
 
@@ -316,8 +358,11 @@ export default function TicketSalesPage() {
                       <td className="px-4 py-3 text-right text-[#4CD080] font-bold">{fmt(s.totalPrice)}</td>
                       <td className="px-4 py-3 text-right text-[#9CA3AF]">{fmtDate(s.createdAt)}</td>
                       <td className="px-4 py-3 text-right">
-                        <button onClick={() => { if (confirm('Remover esta venda?')) deleteTicketSale.mutate(s.id) }}
-                          className="text-xs text-red-400 hover:text-red-500">✕</button>
+                        <div className="flex items-center gap-2 justify-end">
+                          <button onClick={() => openEditTicketGuest(s)} className="text-xs text-[#7C5CBF] hover:text-[#9B7DD4]">✎</button>
+                          <button onClick={() => { if (confirm('Remover esta venda?')) deleteTicketSale.mutate(s.id) }}
+                            className="text-xs text-red-400 hover:text-red-500">✕</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -417,6 +462,48 @@ export default function TicketSalesPage() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ─── Edit ticket guest modal ─────────────────────────────────────────────── */}
+      {editingTicketGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 w-full max-w-md mx-4">
+            <h3 className="font-bold text-[#1A1A2E] mb-4">Editar Convidado</h3>
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className={lbl}>Nome *</label>
+                <input value={editingTicketGuest.name}
+                  onChange={e => setEditingTicketGuest(g => g && ({ ...g, name: e.target.value }))}
+                  className={inp} autoFocus />
+              </div>
+              {editingTicketGuest.guestId && (
+                <>
+                  <div>
+                    <label className={lbl}>Telefone</label>
+                    <input value={editingTicketGuest.phone}
+                      onChange={e => setEditingTicketGuest(g => g && ({ ...g, phone: e.target.value }))}
+                      className={inp} />
+                  </div>
+                  <div>
+                    <label className={lbl}>E-mail</label>
+                    <input value={editingTicketGuest.email}
+                      onChange={e => setEditingTicketGuest(g => g && ({ ...g, email: e.target.value }))}
+                      className={inp} />
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setEditingTicketGuest(null)}
+                className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
+              <button onClick={saveTicketGuestEdit}
+                disabled={!editingTicketGuest.name.trim() || updateGuestInfo.isPending || updateTicketSaleName.isPending}
+                className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold hover:bg-[#9B7DD4] transition-colors disabled:opacity-50">
+                {(updateGuestInfo.isPending || updateTicketSaleName.isPending) ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

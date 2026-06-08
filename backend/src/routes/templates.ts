@@ -12,6 +12,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     include: {
       sections: { include: { items: true }, orderBy: { order: 'asc' } },
       scriptDays: { include: { items: true }, orderBy: { dayNumber: 'asc' } },
+      templateSuppliers: true,
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -81,9 +82,31 @@ router.post('/from-event/:eventId', async (req: AuthRequest, res: Response) => {
     }
   }
 
+  // Copy suppliers with zeroed values/quantities
+  const eventSuppliers = await prisma.eventSupplier.findMany({ where: { eventId: req.params.eventId } })
+  for (const sup of eventSuppliers) {
+    await prisma.templateSupplier.create({
+      data: {
+        templateId: template.id,
+        catalogMaterialId: sup.catalogMaterialId,
+        catalogSupplierId: sup.catalogSupplierId,
+        category: sup.category,
+        description: sup.description,
+        supplierName: sup.supplierName,
+        supplierPhone: sup.supplierPhone,
+        supplierContact: sup.supplierContact,
+        notes: sup.notes,
+      },
+    })
+  }
+
   const full = await prisma.eventTemplate.findUnique({
     where: { id: template.id },
-    include: { sections: { include: { items: true } }, scriptDays: { include: { items: true } } },
+    include: {
+      sections: { include: { items: true } },
+      scriptDays: { include: { items: true } },
+      templateSuppliers: true,
+    },
   })
   res.status(201).json(full)
 })

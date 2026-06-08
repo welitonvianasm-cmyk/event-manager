@@ -44,6 +44,7 @@ export default function GuestListPage() {
 
   const [showAddForm, setShowAddForm] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', email: '' })
+  const [editingGuest, setEditingGuest] = useState<{ id: string; name: string; phone: string; email: string } | null>(null)
   const [showImport, setShowImport] = useState(false)
   const [sheetUrl, setSheetUrl] = useState('')
   const [importMsg, setImportMsg] = useState('')
@@ -94,7 +95,12 @@ export default function GuestListPage() {
   const updateGuest = useMutation({
     mutationFn: ({ gid, data }: { gid: string; data: object }) =>
       api.patch(`/events/${id}/guests/${gid}`, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['guests', id] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['guests', id] })
+      qc.invalidateQueries({ queryKey: ['ticket-sales', id] })
+      qc.invalidateQueries({ queryKey: ['offer-sales', id] })
+      setEditingGuest(null)
+    },
   })
 
   const deleteGuest = useMutation({
@@ -288,6 +294,42 @@ export default function GuestListPage() {
         </div>
       )}
 
+      {/* Edit guest modal */}
+      {editingGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 w-full max-w-md mx-4">
+            <h3 className="font-bold text-[#1A1A2E] mb-4">Editar Convidado</h3>
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className={lbl}>Nome *</label>
+                <input value={editingGuest.name} onChange={e => setEditingGuest(g => g && ({ ...g, name: e.target.value }))}
+                  className={inp} autoFocus />
+              </div>
+              <div>
+                <label className={lbl}>Telefone</label>
+                <input value={editingGuest.phone} onChange={e => setEditingGuest(g => g && ({ ...g, phone: e.target.value }))}
+                  className={inp} />
+              </div>
+              <div>
+                <label className={lbl}>E-mail</label>
+                <input value={editingGuest.email} onChange={e => setEditingGuest(g => g && ({ ...g, email: e.target.value }))}
+                  className={inp} />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setEditingGuest(null)}
+                className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
+              <button
+                onClick={() => updateGuest.mutate({ gid: editingGuest.id, data: { name: editingGuest.name, phone: editingGuest.phone || undefined, email: editingGuest.email || undefined } })}
+                disabled={!editingGuest.name.trim() || updateGuest.isPending}
+                className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold hover:bg-[#9B7DD4] transition-colors disabled:opacity-50">
+                {updateGuest.isPending ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Import modal */}
       {showImport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -409,8 +451,12 @@ export default function GuestListPage() {
                         className="w-4 h-4 accent-[#7C5CBF] cursor-pointer" />
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => { if (confirm(`Remover ${g.name}?`)) deleteGuest.mutate(g.id) }}
-                        className="text-xs text-red-400 hover:text-red-500">✕</button>
+                      <div className="flex items-center gap-2 justify-end">
+                        <button onClick={() => setEditingGuest({ id: g.id, name: g.name, phone: g.phone ?? '', email: g.email ?? '' })}
+                          className="text-xs text-[#7C5CBF] hover:text-[#9B7DD4]">✎</button>
+                        <button onClick={() => { if (confirm(`Remover ${g.name}?`)) deleteGuest.mutate(g.id) }}
+                          className="text-xs text-red-400 hover:text-red-500">✕</button>
+                      </div>
                     </td>
                   </tr>
                 )

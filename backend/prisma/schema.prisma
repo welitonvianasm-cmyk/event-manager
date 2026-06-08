@@ -205,8 +205,23 @@ model EventTemplate {
   totalDays Int      @default(1)
   createdAt DateTime @default(now())
 
-  sections   TemplateSection[]
-  scriptDays TemplateScriptDay[]
+  sections          TemplateSection[]
+  scriptDays        TemplateScriptDay[]
+  templateSuppliers TemplateSupplier[]
+}
+
+model TemplateSupplier {
+  id                String        @id @default(cuid())
+  templateId        String
+  template          EventTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  catalogMaterialId String?
+  catalogSupplierId String?
+  category          String        @default("OUTRO")
+  description       String
+  supplierName      String?
+  supplierPhone     String?
+  supplierContact   String?
+  notes             String?
 }
 
 model TemplateSection {

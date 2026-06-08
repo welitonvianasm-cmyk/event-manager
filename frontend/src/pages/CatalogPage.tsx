@@ -11,6 +11,9 @@ const catLabel: Record<string, string> = {
 const inputCls = 'w-full bg-white border border-black/[0.08] text-[#1A1A2E] placeholder-[#9CA3AF] rounded-[10px] px-3 py-2 text-sm focus:outline-none focus:border-[#7C5CBF] focus:ring-2 focus:ring-[#EDE9F8]'
 const labelCls = 'block text-xs font-bold text-[#6B7280] mb-1'
 
+const emptySupForm = { name: '', category: 'MATERIAL_EVENTO', phone: '', email: '', contactName: '', address: '', notes: '' }
+const emptyMatForm = { name: '', category: 'MATERIAL_EVENTO', preferredSupplierId: '', defaultUnitPrice: '', notes: '' }
+
 export default function CatalogPage() {
   const qc = useQueryClient()
   const [tab, setTab] = useState<'suppliers' | 'materials'>('suppliers')
@@ -18,28 +21,101 @@ export default function CatalogPage() {
   const { data: suppliers } = useQuery<any[]>({ queryKey: ['catalog-suppliers'], queryFn: () => api.get('/catalog/suppliers').then(r => r.data) })
   const { data: materials } = useQuery<any[]>({ queryKey: ['catalog-materials'], queryFn: () => api.get('/catalog/materials').then(r => r.data) })
 
-  const [supForm, setSupForm] = useState({ name: '', category: 'MATERIAL_EVENTO', phone: '', email: '', contactName: '', address: '', notes: '' })
-  const [matForm, setMatForm] = useState({ name: '', category: 'MATERIAL_EVENTO', preferredSupplierId: '', defaultUnitPrice: '', notes: '' })
+  // Supplier state
+  const [supForm, setSupForm] = useState(emptySupForm)
   const [showSupForm, setShowSupForm] = useState(false)
+  const [editingSupId, setEditingSupId] = useState<string | null>(null)
+  const [supCatFilter, setSupCatFilter] = useState('')
+
+  // Material state
+  const [matForm, setMatForm] = useState(emptyMatForm)
   const [showMatForm, setShowMatForm] = useState(false)
+  const [editingMatId, setEditingMatId] = useState<string | null>(null)
   const [matSupFilter, setMatSupFilter] = useState('')
 
-  const addSupplier = useMutation({
-    mutationFn: (data: object) => api.post('/catalog/suppliers', data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['catalog-suppliers'] }); setShowSupForm(false); setSupForm({ name: '', category: 'MATERIAL_EVENTO', phone: '', email: '', contactName: '', address: '', notes: '' }) },
+  function openNewSupplier() {
+    setEditingSupId(null)
+    setSupForm(emptySupForm)
+    setShowSupForm(true)
+  }
+
+  function openEditSupplier(s: any) {
+    setEditingSupId(s.id)
+    setSupForm({ name: s.name, category: s.category, phone: s.phone ?? '', email: s.email ?? '', contactName: s.contactName ?? '', address: s.address ?? '', notes: s.notes ?? '' })
+    setShowSupForm(true)
+  }
+
+  function openNewMaterial() {
+    setEditingMatId(null)
+    setMatForm(emptyMatForm)
+    setShowMatForm(true)
+  }
+
+  function openEditMaterial(m: any) {
+    setEditingMatId(m.id)
+    setMatForm({ name: m.name, category: m.category, preferredSupplierId: m.preferredSupplierId ?? '', defaultUnitPrice: m.defaultUnitPrice ? String(m.defaultUnitPrice) : '', notes: m.notes ?? '' })
+    setShowMatForm(true)
+  }
+
+  const saveSupplier = useMutation({
+    mutationFn: (data: object) => editingSupId
+      ? api.put(`/catalog/suppliers/${editingSupId}`, data)
+      : api.post('/catalog/suppliers', data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['catalog-suppliers'] })
+      setShowSupForm(false)
+      setEditingSupId(null)
+      setSupForm(emptySupForm)
+    },
   })
+
   const deleteSupplier = useMutation({
     mutationFn: (id: string) => api.delete(`/catalog/suppliers/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['catalog-suppliers'] }),
   })
-  const addMaterial = useMutation({
-    mutationFn: (data: object) => api.post('/catalog/materials', data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['catalog-materials'] }); setShowMatForm(false); setMatForm({ name: '', category: 'MATERIAL_EVENTO', preferredSupplierId: '', defaultUnitPrice: '', notes: '' }) },
+
+  const saveMaterial = useMutation({
+    mutationFn: (data: object) => editingMatId
+      ? api.put(`/catalog/materials/${editingMatId}`, data)
+      : api.post('/catalog/materials', data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['catalog-materials'] })
+      setShowMatForm(false)
+      setEditingMatId(null)
+      setMatForm(emptyMatForm)
+    },
   })
+
   const deleteMaterial = useMutation({
     mutationFn: (id: string) => api.delete(`/catalog/materials/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['catalog-materials'] }),
   })
+
+  function submitSupplier() {
+    saveSupplier.mutate({
+      name: supForm.name,
+      category: supForm.category,
+      phone: supForm.phone || undefined,
+      email: supForm.email || undefined,
+      contactName: supForm.contactName || undefined,
+      address: supForm.address || undefined,
+      notes: supForm.notes || undefined,
+    })
+  }
+
+  function submitMaterial() {
+    saveMaterial.mutate({
+      name: matForm.name,
+      category: matForm.category,
+      defaultUnitPrice: matForm.defaultUnitPrice ? parseFloat(matForm.defaultUnitPrice) : undefined,
+      preferredSupplierId: matForm.preferredSupplierId || undefined,
+      notes: matForm.notes || undefined,
+    })
+  }
+
+  const filteredSuppliers = supCatFilter
+    ? (suppliers ?? []).filter((s: any) => s.category === supCatFilter)
+    : (suppliers ?? [])
 
   return (
     <div>
@@ -48,7 +124,7 @@ export default function CatalogPage() {
           <h1 className="text-[22px] font-bold text-[#1A1A2E]">Catálogo</h1>
           <p className="text-sm text-[#6B7280]">Materiais e fornecedores reutilizáveis em qualquer evento</p>
         </div>
-        <button onClick={() => tab === 'suppliers' ? setShowSupForm(true) : setShowMatForm(true)}
+        <button onClick={() => tab === 'suppliers' ? openNewSupplier() : openNewMaterial()}
           className="bg-[#7C5CBF] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[#9B7DD4] transition-colors">
           + Cadastrar {tab === 'suppliers' ? 'Fornecedor' : 'Material'}
         </button>
@@ -69,10 +145,10 @@ export default function CatalogPage() {
       {showSupForm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 w-full max-w-md">
-            <h3 className="font-bold text-[#1A1A2E] mb-4">Cadastrar Fornecedor</h3>
+            <h3 className="font-bold text-[#1A1A2E] mb-4">{editingSupId ? 'Editar Fornecedor' : 'Cadastrar Fornecedor'}</h3>
             <div className="flex flex-col gap-3">
               <div><label className={labelCls}>Nome *</label>
-                <input value={supForm.name} onChange={e => setSupForm(f => ({ ...f, name: e.target.value }))} className={inputCls} /></div>
+                <input value={supForm.name} onChange={e => setSupForm(f => ({ ...f, name: e.target.value }))} className={inputCls} autoFocus /></div>
               <div><label className={labelCls}>Categoria</label>
                 <select value={supForm.category} onChange={e => setSupForm(f => ({ ...f, category: e.target.value }))} className={inputCls}>
                   {CATEGORIES.map(c => <option key={c} value={c}>{catLabel[c]}</option>)}</select></div>
@@ -92,10 +168,11 @@ export default function CatalogPage() {
                   className={`${inputCls} resize-none`} /></div>
             </div>
             <div className="flex gap-3 mt-4">
-              <button onClick={() => setShowSupForm(false)} className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
-              <button onClick={() => addSupplier.mutate(supForm)} disabled={!supForm.name || addSupplier.isPending}
+              <button onClick={() => { setShowSupForm(false); setEditingSupId(null) }}
+                className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
+              <button onClick={submitSupplier} disabled={!supForm.name || saveSupplier.isPending}
                 className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold disabled:opacity-50 hover:bg-[#9B7DD4] transition-colors">
-                {addSupplier.isPending ? 'Salvando...' : 'Salvar'}</button>
+                {saveSupplier.isPending ? 'Salvando...' : editingSupId ? 'Salvar alterações' : 'Salvar'}</button>
             </div>
           </div>
         </div>
@@ -105,10 +182,10 @@ export default function CatalogPage() {
       {showMatForm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 w-full max-w-md">
-            <h3 className="font-bold text-[#1A1A2E] mb-4">Cadastrar Material</h3>
+            <h3 className="font-bold text-[#1A1A2E] mb-4">{editingMatId ? 'Editar Material' : 'Cadastrar Material'}</h3>
             <div className="flex flex-col gap-3">
               <div><label className={labelCls}>Nome *</label>
-                <input value={matForm.name} onChange={e => setMatForm(f => ({ ...f, name: e.target.value }))} className={inputCls} /></div>
+                <input value={matForm.name} onChange={e => setMatForm(f => ({ ...f, name: e.target.value }))} className={inputCls} autoFocus /></div>
               <div><label className={labelCls}>Categoria</label>
                 <select value={matForm.category} onChange={e => setMatForm(f => ({ ...f, category: e.target.value }))} className={inputCls}>
                   {CATEGORIES.map(c => <option key={c} value={c}>{catLabel[c]}</option>)}</select></div>
@@ -123,11 +200,11 @@ export default function CatalogPage() {
                   className={`${inputCls} resize-none`} /></div>
             </div>
             <div className="flex gap-3 mt-4">
-              <button onClick={() => setShowMatForm(false)} className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
-              <button onClick={() => addMaterial.mutate({ ...matForm, defaultUnitPrice: matForm.defaultUnitPrice ? parseFloat(matForm.defaultUnitPrice) : undefined, preferredSupplierId: matForm.preferredSupplierId || undefined })}
-                disabled={!matForm.name || addMaterial.isPending}
+              <button onClick={() => { setShowMatForm(false); setEditingMatId(null) }}
+                className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
+              <button onClick={submitMaterial} disabled={!matForm.name || saveMaterial.isPending}
                 className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold disabled:opacity-50 hover:bg-[#9B7DD4] transition-colors">
-                {addMaterial.isPending ? 'Salvando...' : 'Salvar'}</button>
+                {saveMaterial.isPending ? 'Salvando...' : editingMatId ? 'Salvar alterações' : 'Salvar'}</button>
             </div>
           </div>
         </div>
@@ -135,9 +212,22 @@ export default function CatalogPage() {
 
       {tab === 'suppliers' && (
         <div className="flex flex-col gap-3">
-          {!suppliers?.length ? (
-            <div className="text-center py-12 text-[#9CA3AF]"><p className="text-3xl mb-2">🏪</p><p>Nenhum fornecedor cadastrado</p></div>
-          ) : suppliers.map(s => (
+          {/* Category filter */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-[#6B7280] font-bold">Filtrar por categoria:</span>
+            <select value={supCatFilter} onChange={e => setSupCatFilter(e.target.value)}
+              className="text-xs bg-white border border-black/[0.08] text-[#6B7280] rounded-[8px] px-3 py-1.5 focus:outline-none focus:border-[#7C5CBF]">
+              <option value="">Todas</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{catLabel[c]}</option>)}
+            </select>
+            {supCatFilter && (
+              <button onClick={() => setSupCatFilter('')} className="text-xs text-[#9CA3AF] hover:text-red-400 font-bold">✕</button>
+            )}
+          </div>
+
+          {!filteredSuppliers.length ? (
+            <div className="text-center py-12 text-[#9CA3AF]"><p className="text-3xl mb-2">🏪</p><p>Nenhum fornecedor encontrado</p></div>
+          ) : filteredSuppliers.map((s: any) => (
             <div key={s.id} className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 flex items-center justify-between hover:shadow-[0_4px_16px_rgba(124,92,191,0.12)] transition-shadow">
               <div>
                 <div className="flex items-center gap-2">
@@ -147,7 +237,10 @@ export default function CatalogPage() {
                 <p className="text-xs text-[#9CA3AF] mt-0.5">{[s.phone, s.contactName, s.email].filter(Boolean).join(' · ')}</p>
                 {s.address && <p className="text-xs text-[#9CA3AF] mt-0.5">📍 {s.address}</p>}
               </div>
-              <button onClick={() => { if (confirm('Excluir?')) deleteSupplier.mutate(s.id) }} className="text-xs text-red-400 hover:text-red-500">✕ Excluir</button>
+              <div className="flex items-center gap-3">
+                <button onClick={() => openEditSupplier(s)} className="text-xs text-[#7C5CBF] hover:text-[#9B7DD4]">✎ Editar</button>
+                <button onClick={() => { if (confirm('Excluir?')) deleteSupplier.mutate(s.id) }} className="text-xs text-red-400 hover:text-red-500">✕ Excluir</button>
+              </div>
             </div>
           ))}
         </div>
@@ -182,7 +275,10 @@ export default function CatalogPage() {
                   {m.defaultUnitPrice && ` · R$ ${Number(m.defaultUnitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 </p>
               </div>
-              <button onClick={() => { if (confirm('Excluir?')) deleteMaterial.mutate(m.id) }} className="text-xs text-red-400 hover:text-red-500">✕ Excluir</button>
+              <div className="flex items-center gap-3">
+                <button onClick={() => openEditMaterial(m)} className="text-xs text-[#7C5CBF] hover:text-[#9B7DD4]">✎ Editar</button>
+                <button onClick={() => { if (confirm('Excluir?')) deleteMaterial.mutate(m.id) }} className="text-xs text-red-400 hover:text-red-500">✕ Excluir</button>
+              </div>
             </div>
           ))}
         </div>

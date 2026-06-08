@@ -50,6 +50,10 @@ router.patch('/:id/guests/:gid', async (req: AuthRequest, res: Response) => {
   const parsed = patchSchema.safeParse(req.body)
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
   const guest = await prisma.eventGuest.update({ where: { id: req.params.gid }, data: parsed.data })
+  if (parsed.data.name) {
+    await prisma.ticketSale.updateMany({ where: { guestId: req.params.gid }, data: { guestName: parsed.data.name } })
+    await prisma.offerSale.updateMany({ where: { guestId: req.params.gid }, data: { guestName: parsed.data.name } })
+  }
   res.json(guest)
 })
 

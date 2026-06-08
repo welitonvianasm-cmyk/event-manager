@@ -108,6 +108,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       include: {
         sections: { include: { items: true } },
         scriptDays: { include: { items: true } },
+        templateSuppliers: true,
       },
     })
     if (template) {
@@ -139,6 +140,25 @@ router.post('/', async (req: AuthRequest, res: Response) => {
             },
           })
         }
+      }
+      // Apply template suppliers with zeroed values
+      for (const sup of template.templateSuppliers) {
+        await prisma.eventSupplier.create({
+          data: {
+            eventId: event.id,
+            catalogMaterialId: sup.catalogMaterialId,
+            catalogSupplierId: sup.catalogSupplierId,
+            category: sup.category,
+            description: sup.description,
+            supplierName: sup.supplierName,
+            supplierPhone: sup.supplierPhone,
+            supplierContact: sup.supplierContact,
+            notes: sup.notes,
+            quantity: null,
+            unitPrice: null,
+            shippingCost: null,
+          },
+        })
       }
     }
   } else {

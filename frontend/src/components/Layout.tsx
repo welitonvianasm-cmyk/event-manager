@@ -79,8 +79,8 @@ export default function Layout() {
               <img src="/favicon.svg" alt="event. logo" className="w-7 h-7" />
             </div>
             <div>
-              <span className="font-bold text-white text-[15px] block leading-tight">EventManager</span>
-              <span className="text-[10px] text-white/60">Sistema de Gestão para Eventos</span>
+              <span className="font-bold text-white text-[15px] block leading-tight">event.</span>
+              <span className="text-[10px] text-white/60">Sistema de gestão</span>
             </div>
           </div>
         </div>
