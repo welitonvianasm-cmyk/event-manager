@@ -37,10 +37,30 @@ router.get('/all-financial', async (req: AuthRequest, res: Response) => {
       prisma.eventSupplier.findMany({ where: { eventId: event.id } }),
     ])
     const ticketRevenue = ticketSales.reduce((s, t) => s + t.totalPrice, 0)
+    const ticketSoldQty = ticketSales.filter(t => t.unitPrice > 0).reduce((s, t) => s + t.quantity, 0)
+    const courtesyQty = ticketSales.filter(t => t.unitPrice === 0).reduce((s, t) => s + t.quantity, 0)
+
+    const avistaOffers = offerSales.filter(o => !o.isEntrada && !o.installments)
+    const entradaOffers = offerSales.filter(o => o.isEntrada)
+    const parceladoOffers = offerSales.filter(o => !o.isEntrada && !!o.installments)
     const offerRevenue = offerSales.reduce((s, o) => s + o.value, 0)
+
     const totalExpenses = suppliers.reduce((s, sup) => s + (sup.quantity ?? 1) * (sup.unitPrice ?? 0) + (sup.shippingCost ?? 0), 0)
     const totalRevenue = ticketRevenue + offerRevenue
-    return { id: event.id, name: event.name, startDate: event.startDate, ticketRevenue, offerRevenue, totalRevenue, totalExpenses, profit: totalRevenue - totalExpenses }
+
+    return {
+      id: event.id, name: event.name, startDate: event.startDate,
+      ticketRevenue, ticketSoldQty, courtesyQty,
+      offerRevenue,
+      offerCount: offerSales.length,
+      offerAvistaCount: avistaOffers.length,
+      offerAvistaTotal: avistaOffers.reduce((s, o) => s + o.value, 0),
+      offerEntradaCount: entradaOffers.length,
+      offerEntradaTotal: entradaOffers.reduce((s, o) => s + o.value, 0),
+      offerParceladoCount: parceladoOffers.length,
+      offerParceladoTotal: parceladoOffers.reduce((s, o) => s + o.value, 0),
+      totalRevenue, totalExpenses, profit: totalRevenue - totalExpenses,
+    }
   }))
 
   res.json(summaries)

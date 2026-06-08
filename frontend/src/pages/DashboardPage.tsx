@@ -132,17 +132,17 @@ export default function DashboardPage() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5">
-          <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em] mb-2">Total de Eventos</p>
-          <p className="text-[28px] font-bold text-[#1A1A2E]">{total}</p>
+        <div className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-5">
+          <p className="text-[9px] font-bold text-white/70 uppercase tracking-[0.1em] mb-2">Total de Eventos</p>
+          <p className="text-[28px] font-bold text-white">{total}</p>
         </div>
-        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5">
-          <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em] mb-2">Em Andamento</p>
-          <p className="text-[28px] font-bold text-[#0C6E93]">{emAndamento}</p>
+        <div className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-5">
+          <p className="text-[9px] font-bold text-white/70 uppercase tracking-[0.1em] mb-2">Em Andamento</p>
+          <p className="text-[28px] font-bold text-white">{emAndamento}</p>
         </div>
-        <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5">
-          <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em] mb-2">Realizados</p>
-          <p className="text-[28px] font-bold text-[#155724]">{concluido}</p>
+        <div className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-5">
+          <p className="text-[9px] font-bold text-white/70 uppercase tracking-[0.1em] mb-2">Realizados</p>
+          <p className="text-[28px] font-bold text-white">{concluido}</p>
         </div>
       </div>
 
@@ -267,26 +267,26 @@ export default function DashboardPage() {
             const progress = calcProgress(event)
             return (
               <Link key={event.id} to={`/events/${event.id}`}
-                className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-5 hover:shadow-[0_4px_16px_rgba(124,92,191,0.12)] transition-shadow block">
+                className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-5 hover:bg-[#9B7DD4] transition-colors block">
                 <div className="flex items-start justify-between mb-3">
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${typeColor[event.eventType]}`}>
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/20 text-white">
                     {typeLabel[event.eventType]}
                   </span>
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${statusColor[event.status]}`}>
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/20 text-white">
                     {statusLabel[event.status]}
                   </span>
                 </div>
-                <h2 className="font-bold text-[#1A1A2E] mb-1">{event.name}</h2>
-                <p className="text-xs text-[#9CA3AF] mb-4">
+                <h2 className="font-bold text-white mb-1">{event.name}</h2>
+                <p className="text-xs text-white/70 mb-4">
                   {new Date(event.startDate).toLocaleDateString('pt-BR')} · {event.totalDays} dia(s)
                 </p>
                 <div>
-                  <div className="flex justify-between text-xs text-[#9CA3AF] mb-1">
+                  <div className="flex justify-between text-xs text-white/70 mb-1">
                     <span>Checklist</span>
                     <span>{progress}%</span>
                   </div>
-                  <div className="h-1.5 bg-[#EDE9F8] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#7C5CBF] rounded-full transition-all" style={{ width: `${progress}%` }} />
+                  <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-white rounded-full transition-all" style={{ width: `${progress}%` }} />
                   </div>
                 </div>
               </Link>

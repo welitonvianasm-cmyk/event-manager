@@ -439,20 +439,20 @@ export default function EventPage() {
       </div>
 
       {/* Header */}
-      <div className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-6 mb-6">
+      <div className="bg-[#7C5CBF] rounded-[14px] shadow-[0_1px_3px_rgba(124,92,191,0.3)] p-6 mb-6">
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span className={`text-xs font-bold px-3 py-1 rounded-full ${typeColor[event.eventType] ?? 'bg-[#EDE9F8] text-[#7C5CBF]'}`}>
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/20 text-white">
                 {typeLabel[event.eventType]}
               </span>
-              <span className="text-xs text-[#9CA3AF]">{event.totalDays} dia(s)</span>
-              <span className={`text-xs font-bold px-3 py-1 rounded-full ${statusColor[event.status] ?? 'bg-[#F8F7FC] text-[#9CA3AF]'}`}>
+              <span className="text-xs text-white/70">{event.totalDays} dia(s)</span>
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/20 text-white">
                 {event.status === 'RASCUNHO' ? 'Rascunho' : event.status === 'EM_ANDAMENTO' ? 'Em andamento' : 'Concluído'}
               </span>
             </div>
-            <h1 className="text-[22px] font-bold text-[#1A1A2E]">{event.name}</h1>
-            <p className="text-sm text-[#6B7280] mt-1">
+            <h1 className="text-[22px] font-bold text-white">{event.name}</h1>
+            <p className="text-sm text-white/70 mt-1">
               {new Date(event.startDate).toLocaleDateString('pt-BR')} → {new Date(event.endDate).toLocaleDateString('pt-BR')}
               {event.location && ` · ${event.location}`}
               {event.onlineUrl && ` · ${event.onlineUrl}`}
@@ -461,31 +461,31 @@ export default function EventPage() {
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
             <select value={event.status} onChange={e => updateStatus.mutate(e.target.value)}
-              className="text-sm bg-white border border-black/[0.08] text-[#1A1A2E] rounded-full px-4 py-1.5 focus:outline-none focus:border-[#7C5CBF] focus:ring-2 focus:ring-[#EDE9F8]">
+              className="text-sm bg-white text-[#1A1A2E] rounded-full px-4 py-1.5 focus:outline-none border-0">
               <option value="RASCUNHO">Rascunho</option>
               <option value="EM_ANDAMENTO">Em andamento</option>
               <option value="CONCLUIDO">Concluído</option>
             </select>
             <Link to={`/events/${id}/edit`}
-              className="text-sm text-[#6B7280] hover:text-[#1A1A2E] px-4 py-1.5 border border-black/[0.15] rounded-full hover:bg-[#F3F2F8] transition-colors">
+              className="text-sm text-white px-4 py-1.5 border border-white/30 rounded-full hover:bg-white/10 transition-colors">
               ✏️ Editar
             </Link>
             <button onClick={() => { setTemplateName(event.name); setShowTemplateModal(true) }}
-              className="text-sm text-[#7C5CBF] hover:text-[#9B7DD4] px-4 py-1.5 border border-[#7C5CBF]/40 rounded-full hover:bg-[#EDE9F8] transition-colors">
+              className="text-sm text-white px-4 py-1.5 border border-white/30 rounded-full hover:bg-white/10 transition-colors">
               Salvar como Template
             </button>
             <button onClick={() => { if (confirm('Excluir este evento?')) deleteEvent.mutate() }}
-              className="text-sm text-red-500 hover:text-red-600 px-4 py-1.5 border border-red-200 rounded-full hover:bg-red-50 transition-colors">
+              className="text-sm text-red-200 px-4 py-1.5 border border-red-300/50 rounded-full hover:bg-red-500/20 transition-colors">
               Excluir
             </button>
           </div>
         </div>
-        <div className="mb-1 flex justify-between text-xs text-[#9CA3AF]">
+        <div className="mb-1 flex justify-between text-xs text-white/70">
           <span>Progresso geral do checklist</span>
           <span>{progress}%</span>
         </div>
-        <div className="h-2 bg-[#EDE9F8] rounded-full overflow-hidden">
-          <div className="h-full bg-[#7C5CBF] rounded-full transition-all" style={{ width: `${progress}%` }} />
+        <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+          <div className="h-full bg-white rounded-full transition-all" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
