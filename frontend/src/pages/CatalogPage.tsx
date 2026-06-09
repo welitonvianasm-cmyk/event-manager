@@ -26,6 +26,7 @@ export default function CatalogPage() {
   const [showSupForm, setShowSupForm] = useState(false)
   const [editingSupId, setEditingSupId] = useState<string | null>(null)
   const [supCatFilter, setSupCatFilter] = useState('')
+  const [expandedSupId, setExpandedSupId] = useState<string | null>(null)
 
   // Material state
   const [matForm, setMatForm] = useState(emptyMatForm)
@@ -227,22 +228,75 @@ export default function CatalogPage() {
 
           {!filteredSuppliers.length ? (
             <div className="text-center py-12 text-[#9CA3AF]"><p className="text-3xl mb-2">🏪</p><p>Nenhum fornecedor encontrado</p></div>
-          ) : filteredSuppliers.map((s: any) => (
-            <div key={s.id} className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] p-4 flex items-center justify-between hover:shadow-[0_4px_16px_rgba(124,92,191,0.12)] transition-shadow">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#1A1A2E]">{s.name}</span>
-                  <span className="text-xs bg-[#F3F2F8] text-[#6B7280] px-2 py-0.5 rounded-full border border-black/[0.08]">{catLabel[s.category]}</span>
+          ) : filteredSuppliers.map((s: any) => {
+            const supMaterials = (materials ?? []).filter((m: any) => m.preferredSupplierId === s.id)
+            const isExpanded = expandedSupId === s.id
+            return (
+              <div key={s.id} className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_3px_rgba(124,92,191,0.08)] overflow-hidden hover:shadow-[0_4px_16px_rgba(124,92,191,0.12)] transition-shadow">
+                {/* Header row — click to expand */}
+                <div
+                  className="p-4 flex items-center justify-between cursor-pointer select-none"
+                  onClick={() => setExpandedSupId(isExpanded ? null : s.id)}
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-[#1A1A2E]">{s.name}</span>
+                      <span className="text-xs bg-[#F3F2F8] text-[#6B7280] px-2 py-0.5 rounded-full border border-black/[0.08]">{catLabel[s.category]}</span>
+                      {supMaterials.length > 0 && (
+                        <span className="text-xs bg-[#EDE9F8] text-[#7C5CBF] px-2 py-0.5 rounded-full font-bold">
+                          {supMaterials.length} produto{supMaterials.length > 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-[#9CA3AF] mt-0.5">{[s.phone, s.contactName, s.email].filter(Boolean).join(' · ')}</p>
+                    {s.address && <p className="text-xs text-[#9CA3AF] mt-0.5">📍 {s.address}</p>}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={e => { e.stopPropagation(); openEditSupplier(s) }}
+                      className="text-xs text-[#7C5CBF] hover:text-[#9B7DD4]">✎ Editar</button>
+                    <button
+                      onClick={e => { e.stopPropagation(); if (confirm('Excluir?')) deleteSupplier.mutate(s.id) }}
+                      className="text-xs text-red-400 hover:text-red-500">✕ Excluir</button>
+                    <span className={`text-[#9CA3AF] text-xs transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
+                  </div>
                 </div>
-                <p className="text-xs text-[#9CA3AF] mt-0.5">{[s.phone, s.contactName, s.email].filter(Boolean).join(' · ')}</p>
-                {s.address && <p className="text-xs text-[#9CA3AF] mt-0.5">📍 {s.address}</p>}
+
+                {/* Expanded: product list */}
+                {isExpanded && (
+                  <div className="border-t border-black/[0.06] bg-[#F8F7FC]">
+                    {supMaterials.length === 0 ? (
+                      <p className="px-4 py-3 text-xs text-[#9CA3AF]">Nenhum produto vinculado a este fornecedor.</p>
+                    ) : (
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="border-b border-black/[0.06]">
+                            <th className="text-left px-4 py-2 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Produto</th>
+                            <th className="text-left px-4 py-2 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Categoria</th>
+                            <th className="text-right px-4 py-2 text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.1em]">Último valor</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {supMaterials.map((m: any) => (
+                            <tr key={m.id} className="border-b border-black/[0.04] last:border-0 hover:bg-[#EDE9F8]/40">
+                              <td className="px-4 py-2.5 font-bold text-[#1A1A2E]">{m.name}</td>
+                              <td className="px-4 py-2.5 text-[#6B7280]">{catLabel[m.category]}</td>
+                              <td className="px-4 py-2.5 text-right font-bold text-[#7C5CBF]">
+                                {m.defaultUnitPrice
+                                  ? `R$ ${Number(m.defaultUnitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                                  : <span className="text-[#9CA3AF] font-normal">—</span>
+                                }
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-3">
-                <button onClick={() => openEditSupplier(s)} className="text-xs text-[#7C5CBF] hover:text-[#9B7DD4]">✎ Editar</button>
-                <button onClick={() => { if (confirm('Excluir?')) deleteSupplier.mutate(s.id) }} className="text-xs text-red-400 hover:text-red-500">✕ Excluir</button>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
