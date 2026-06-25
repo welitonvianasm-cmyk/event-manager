@@ -12,7 +12,7 @@ const supplierSchema = z.object({
   name: z.string().min(1),
   category: categoryEnum,
   phone: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.preprocess(v => v === '' ? undefined : v, z.string().email().optional()),
   contactName: z.string().optional(),
   address: z.string().optional(),
   notes: z.string().optional(),

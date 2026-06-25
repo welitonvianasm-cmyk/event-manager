@@ -27,46 +27,56 @@ export default function CatalogPage() {
   const [editingSupId, setEditingSupId] = useState<string | null>(null)
   const [supCatFilter, setSupCatFilter] = useState('')
   const [expandedSupId, setExpandedSupId] = useState<string | null>(null)
+  const [supError, setSupError] = useState('')
 
   // Material state
   const [matForm, setMatForm] = useState(emptyMatForm)
   const [showMatForm, setShowMatForm] = useState(false)
   const [editingMatId, setEditingMatId] = useState<string | null>(null)
   const [matSupFilter, setMatSupFilter] = useState('')
+  const [matError, setMatError] = useState('')
 
   function openNewSupplier() {
     setEditingSupId(null)
     setSupForm(emptySupForm)
+    setSupError('')
     setShowSupForm(true)
   }
 
   function openEditSupplier(s: any) {
     setEditingSupId(s.id)
     setSupForm({ name: s.name, category: s.category, phone: s.phone ?? '', email: s.email ?? '', contactName: s.contactName ?? '', address: s.address ?? '', notes: s.notes ?? '' })
+    setSupError('')
     setShowSupForm(true)
   }
 
   function openNewMaterial() {
     setEditingMatId(null)
     setMatForm(emptyMatForm)
+    setMatError('')
     setShowMatForm(true)
   }
 
   function openEditMaterial(m: any) {
     setEditingMatId(m.id)
     setMatForm({ name: m.name, category: m.category, preferredSupplierId: m.preferredSupplierId ?? '', defaultUnitPrice: m.defaultUnitPrice ? String(m.defaultUnitPrice) : '', notes: m.notes ?? '' })
+    setMatError('')
     setShowMatForm(true)
   }
 
   const saveSupplier = useMutation({
-    mutationFn: (data: object) => editingSupId
-      ? api.put(`/catalog/suppliers/${editingSupId}`, data)
-      : api.post('/catalog/suppliers', data),
+    mutationFn: ({ id, data }: { id: string | null; data: object }) =>
+      id ? api.put(`/catalog/suppliers/${id}`, data) : api.post('/catalog/suppliers', data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['catalog-suppliers'] })
       setShowSupForm(false)
       setEditingSupId(null)
       setSupForm(emptySupForm)
+      setSupError('')
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.error
+      setSupError(typeof msg === 'string' ? msg : 'Erro ao salvar fornecedor. Verifique os dados e tente novamente.')
     },
   })
 
@@ -76,14 +86,18 @@ export default function CatalogPage() {
   })
 
   const saveMaterial = useMutation({
-    mutationFn: (data: object) => editingMatId
-      ? api.put(`/catalog/materials/${editingMatId}`, data)
-      : api.post('/catalog/materials', data),
+    mutationFn: ({ id, data }: { id: string | null; data: object }) =>
+      id ? api.put(`/catalog/materials/${id}`, data) : api.post('/catalog/materials', data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['catalog-materials'] })
       setShowMatForm(false)
       setEditingMatId(null)
       setMatForm(emptyMatForm)
+      setMatError('')
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.error
+      setMatError(typeof msg === 'string' ? msg : 'Erro ao salvar material. Verifique os dados e tente novamente.')
     },
   })
 
@@ -94,23 +108,29 @@ export default function CatalogPage() {
 
   function submitSupplier() {
     saveSupplier.mutate({
-      name: supForm.name,
-      category: supForm.category,
-      phone: supForm.phone || undefined,
-      email: supForm.email || undefined,
-      contactName: supForm.contactName || undefined,
-      address: supForm.address || undefined,
-      notes: supForm.notes || undefined,
+      id: editingSupId,
+      data: {
+        name: supForm.name,
+        category: supForm.category,
+        phone: supForm.phone || undefined,
+        email: supForm.email || undefined,
+        contactName: supForm.contactName || undefined,
+        address: supForm.address || undefined,
+        notes: supForm.notes || undefined,
+      },
     })
   }
 
   function submitMaterial() {
     saveMaterial.mutate({
-      name: matForm.name,
-      category: matForm.category,
-      defaultUnitPrice: matForm.defaultUnitPrice ? parseFloat(matForm.defaultUnitPrice) : undefined,
-      preferredSupplierId: matForm.preferredSupplierId || undefined,
-      notes: matForm.notes || undefined,
+      id: editingMatId,
+      data: {
+        name: matForm.name,
+        category: matForm.category,
+        defaultUnitPrice: matForm.defaultUnitPrice ? parseFloat(matForm.defaultUnitPrice) : undefined,
+        preferredSupplierId: matForm.preferredSupplierId || undefined,
+        notes: matForm.notes || undefined,
+      },
     })
   }
 
@@ -168,8 +188,9 @@ export default function CatalogPage() {
                 <textarea value={supForm.notes} onChange={e => setSupForm(f => ({ ...f, notes: e.target.value }))} rows={2}
                   className={`${inputCls} resize-none`} /></div>
             </div>
+            {supError && <p className="text-sm text-red-500 mt-3">{supError}</p>}
             <div className="flex gap-3 mt-4">
-              <button onClick={() => { setShowSupForm(false); setEditingSupId(null) }}
+              <button onClick={() => { setShowSupForm(false); setEditingSupId(null); setSupError('') }}
                 className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
               <button onClick={submitSupplier} disabled={!supForm.name || saveSupplier.isPending}
                 className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold disabled:opacity-50 hover:bg-[#9B7DD4] transition-colors">
@@ -200,8 +221,9 @@ export default function CatalogPage() {
                 <textarea value={matForm.notes} onChange={e => setMatForm(f => ({ ...f, notes: e.target.value }))} rows={2}
                   className={`${inputCls} resize-none`} /></div>
             </div>
+            {matError && <p className="text-sm text-red-500 mt-3">{matError}</p>}
             <div className="flex gap-3 mt-4">
-              <button onClick={() => { setShowMatForm(false); setEditingMatId(null) }}
+              <button onClick={() => { setShowMatForm(false); setEditingMatId(null); setMatError('') }}
                 className="flex-1 border border-black/[0.15] rounded-full py-2 text-sm text-[#6B7280] hover:bg-[#F3F2F8] transition-colors">Cancelar</button>
               <button onClick={submitMaterial} disabled={!matForm.name || saveMaterial.isPending}
                 className="flex-1 bg-[#7C5CBF] text-white rounded-full py-2 text-sm font-bold disabled:opacity-50 hover:bg-[#9B7DD4] transition-colors">
