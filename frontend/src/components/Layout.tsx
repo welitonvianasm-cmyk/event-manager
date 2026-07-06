@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -34,22 +35,22 @@ function ImpersonationBanner() {
 
 const navItems = [
   { to: '/', label: 'Eventos', icon: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
     </svg>
   ), end: true },
   { to: '/catalog', label: 'Catálogo', icon: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
     </svg>
   ) },
   { to: '/templates', label: 'Templates', icon: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
   ) },
   { to: '/reports', label: 'Relatórios', icon: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
   ) },
@@ -58,6 +59,15 @@ const navItems = [
 export default function Layout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sidebar-collapsed') === 'true')
+
+  function toggleSidebar() {
+    setCollapsed(v => {
+      const next = !v
+      localStorage.setItem('sidebar-collapsed', String(next))
+      return next
+    })
+  }
 
   function handleLogout() {
     logout()
@@ -71,74 +81,107 @@ export default function Layout() {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-60 bg-[#7C5CBF] flex flex-col shrink-0">
+      <aside className={`${collapsed ? 'w-16' : 'w-60'} bg-[#7C5CBF] flex flex-col shrink-0 transition-all duration-200`}>
+
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-white/15">
-          <div className="flex items-center gap-3">
+        <div className={`py-5 border-b border-white/15 ${collapsed ? 'px-3' : 'px-5'}`}>
+          <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="w-10 h-10 bg-[#EDE9F8] rounded-[10px] flex items-center justify-center shrink-0 overflow-hidden">
               <img src="/favicon.svg" alt="event. logo" className="w-7 h-7" />
             </div>
-            <div>
-              <span className="font-bold text-white text-[15px] block leading-tight">event.</span>
-              <span className="text-[10px] text-white/60">Sistema de gestão</span>
-            </div>
+            {!collapsed && (
+              <div>
+                <span className="font-bold text-white text-[15px] block leading-tight">event.</span>
+                <span className="text-[10px] text-white/60">Sistema de gestão</span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
-          <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.1em] px-3 mb-2 mt-1">Menu</p>
+        <nav className={`flex-1 ${collapsed ? 'px-2' : 'px-3'} py-4 flex flex-col gap-0.5`}>
+          {!collapsed && (
+            <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.1em] px-3 mb-2 mt-1">Menu</p>
+          )}
           {navItems.map(item => (
-            <NavLink key={item.to} to={item.to} end={item.end}
+            <NavLink key={item.to} to={item.to} end={item.end} title={collapsed ? item.label : undefined}
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-sm transition-colors ${
+                `flex items-center ${collapsed ? 'justify-center px-0' : 'gap-2.5 px-3'} py-2.5 rounded-[10px] text-sm transition-colors ${
                   isActive
                     ? 'bg-white text-[#7C5CBF] font-bold'
                     : 'text-white/65 hover:bg-white/10 hover:text-white font-normal'
                 }`
               }>
               {item.icon}
-              {item.label}
+              {!collapsed && item.label}
             </NavLink>
           ))}
 
           {user?.role === 'MASTER' && (
             <>
-              <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.1em] px-3 mb-2 mt-5">Outros</p>
-              <NavLink to="/admin"
+              {!collapsed && (
+                <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.1em] px-3 mb-2 mt-5">Outros</p>
+              )}
+              {collapsed && <div className="mt-4" />}
+              <NavLink to="/admin" title={collapsed ? 'Admin' : undefined}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-sm transition-colors ${
+                  `flex items-center ${collapsed ? 'justify-center px-0' : 'gap-2.5 px-3'} py-2.5 rounded-[10px] text-sm transition-colors ${
                     isActive
                       ? 'bg-white text-[#7C5CBF] font-bold'
                       : 'text-white/65 hover:bg-white/10 hover:text-white font-normal'
                   }`
                 }>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                Admin
+                {!collapsed && 'Admin'}
               </NavLink>
             </>
           )}
         </nav>
 
+        {/* Toggle button */}
+        <button onClick={toggleSidebar}
+          className={`flex items-center ${collapsed ? 'justify-center' : 'justify-end px-4'} py-2 text-white/50 hover:text-white transition-colors border-t border-white/10`}
+          title={collapsed ? 'Expandir menu' : 'Recolher menu'}>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {collapsed
+              ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            }
+          </svg>
+        </button>
+
         {/* User info */}
-        <div className="px-3 py-4 border-t border-white/15">
-          <div className="flex items-center gap-3 px-2 py-2">
-            <div className="w-8 h-8 rounded-full bg-white/25 text-white flex items-center justify-center text-xs font-bold shrink-0">
-              {initials}
+        <div className={`${collapsed ? 'px-2' : 'px-3'} py-4 border-t border-white/15`}>
+          {collapsed ? (
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-white/25 text-white flex items-center justify-center text-xs font-bold">
+                {initials}
+              </div>
+              <button onClick={handleLogout} title="Sair" className="text-white/50 hover:text-white transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white truncate">{user?.name}</p>
-              <p className="text-[11px] text-white/60 truncate">{user?.role === 'MASTER' ? 'Administrador' : 'Cliente'}</p>
+          ) : (
+            <div className="flex items-center gap-3 px-2 py-2">
+              <div className="w-8 h-8 rounded-full bg-white/25 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                {initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-white truncate">{user?.name}</p>
+                <p className="text-[11px] text-white/60 truncate">{user?.role === 'MASTER' ? 'Administrador' : 'Cliente'}</p>
+              </div>
+              <button onClick={handleLogout} title="Sair"
+                className="text-white/50 hover:text-white transition-colors shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
             </div>
-            <button onClick={handleLogout} title="Sair"
-              className="text-white/50 hover:text-white transition-colors shrink-0">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
-          </div>
+          )}
         </div>
       </aside>
 

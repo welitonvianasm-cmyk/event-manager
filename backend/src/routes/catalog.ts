@@ -10,6 +10,7 @@ const categoryEnum = z.enum(['MATERIAL_EVENTO', 'BRINDES', 'BUFFET', 'ESPACO', '
 
 const supplierSchema = z.object({
   name: z.string().min(1),
+  subName: z.string().optional(),
   category: categoryEnum,
   phone: z.string().optional(),
   email: z.preprocess(v => v === '' ? undefined : v, z.string().email().optional()),
@@ -23,6 +24,7 @@ const materialSchema = z.object({
   category: categoryEnum,
   preferredSupplierId: z.string().optional().nullable(),
   defaultUnitPrice: z.number().optional().nullable(),
+  imageUrl: z.string().optional().nullable(),
   notes: z.string().optional(),
 })
 
@@ -90,6 +92,22 @@ router.put('/materials/:id', async (req: AuthRequest, res: Response) => {
   const parsed = materialSchema.partial().safeParse(req.body)
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
   const updated = await prisma.catalogMaterial.update({ where: { id: req.params.id }, data: parsed.data })
+  res.json(updated)
+})
+
+router.patch('/materials/:id/image', async (req: AuthRequest, res: Response) => {
+  const exists = await prisma.catalogMaterial.findFirst({ where: { id: req.params.id } })
+  if (!exists) { res.status(404).json({ error: 'Material não encontrado' }); return }
+  if (exists.userId !== req.userId! && req.userRole !== 'MASTER') {
+    res.status(403).json({ error: 'Sem permissão' }); return
+  }
+  const parsed = z.object({ imageUrl: z.string() }).safeParse(req.body)
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
+  const updated = await prisma.catalogMaterial.update({
+    where: { id: req.params.id },
+    data: { imageUrl: parsed.data.imageUrl },
+    include: { preferredSupplier: true },
+  })
   res.json(updated)
 })
 

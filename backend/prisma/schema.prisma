@@ -27,6 +27,7 @@ model CatalogSupplier {
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   name        String
+  subName     String?
   category    String   @default("OUTRO")
   phone       String?
   email       String?
@@ -48,6 +49,7 @@ model CatalogMaterial {
   preferredSupplierId String?
   preferredSupplier   CatalogSupplier? @relation(fields: [preferredSupplierId], references: [id])
   defaultUnitPrice    Float?
+  imageUrl            String?          @db.Text
   notes               String?
   createdAt           DateTime         @default(now())
 
